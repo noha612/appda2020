@@ -4,11 +4,15 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -92,18 +96,57 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    getId(start);
+                    start.clearFocus();
+                    InputMethodManager in = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    in.hideSoftInputFromWindow(start.getWindowToken(), 0);
+                    getId(start, "start");
                     return true;
                 }
                 return false;
             }
         });
 
+//        final long delay = 1000; // 1 seconds after user stops typing
+//        final long[] last_text_edit = {0};
+//        final Handler handler = new Handler();
+//
+//        final Runnable input_finish_checker = new Runnable() {
+//            public void run() {
+//                if (System.currentTimeMillis() > (last_text_edit[0] + delay - 500)) {
+//                    Toast.makeText(MainActivity.this, "stop typing...", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        };
+//        start.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                handler.removeCallbacks(input_finish_checker);
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                //avoid triggering event when text is empty
+//                if (s.length() > 0) {
+//                    last_text_edit[0] = System.currentTimeMillis();
+//                    handler.postDelayed(  input_finish_checker, delay);
+//                } else {
+//
+//                }
+//            }
+//        });
+
         finish.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    getId(finish);
+                    finish.clearFocus();
+                    InputMethodManager in = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    in.hideSoftInputFromWindow(start.getWindowToken(), 0);
+                    getId(finish, "finish");
                     return true;
                 }
                 return false;
@@ -125,10 +168,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    String host = "https://6893599359e4.ngrok.io";
+    String host = "https://88eecdaa4c47.ngrok.io";
     OkHttpClient client = new OkHttpClient();
+    String startId;
+    String finishId;
 
-    private void getId(final EditText edt) {
+    private void getId(final EditText edt, final String idType) {
         HttpUrl.Builder httpBuilder = HttpUrl.parse(host + "/da2020/v1/findStation").newBuilder();
         httpBuilder.addQueryParameter("name", edt.getText().toString());
         Request request = new Request.Builder().get()
@@ -144,14 +189,20 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
 
                 final String json = response.body().string();
+                final Location location = new ObjectMapper().readValue(json, Location.class);
+                if (idType.equals("start")) startId = location.getIntersection().getId();
+                else finishId = location.getIntersection().getId();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        edt.setText(json);
+                        edt.setText(location.getName());
+                        GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
                         Marker startMarker = new Marker(mapView);
-                        startMarker.setPosition(new GeoPoint(20.9878278, 105.7963234));
+                        startMarker.setPosition(gp);
                         startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                         mapView.getOverlays().add(startMarker);
+                        mapController.setCenter(gp);
+                        mapController.setZoom(18L);
                         Toast.makeText(MainActivity.this, json, Toast.LENGTH_LONG).show();
                     }
                 });
@@ -169,8 +220,8 @@ public class MainActivity extends AppCompatActivity {
 //                    .url(host + "/da2020/v1/findStation?name=ao")
 //                    .build();
         HttpUrl.Builder httpBuilder = HttpUrl.parse(host + "/da2020/v1/findRoute").newBuilder();
-        httpBuilder.addQueryParameter("startId", "6662689543");
-        httpBuilder.addQueryParameter("finishId", "2291276208");
+        httpBuilder.addQueryParameter("startId", startId);
+        httpBuilder.addQueryParameter("finishId", finishId);
         Request request = new Request.Builder().get()
                 .url(httpBuilder.build())
                 .build();
@@ -194,9 +245,21 @@ public class MainActivity extends AppCompatActivity {
                                 geoPoints.add(new GeoPoint(i.getLatitude(), i.getLongitude()));
                             }
                             Polyline line = new Polyline();
-                            line.getOutlinePaint().setColor(Color.BLACK);
+                            line.getOutlinePaint().setColor(Color.RED);
                             line.setPoints(geoPoints);
+                            line.getOutlinePaint().setStrokeWidth(2.5F);
+                            mapView.getOverlayManager().clear();
                             mapView.getOverlayManager().add(line);
+                            Marker startMarker = new Marker(mapView);
+
+                            startMarker.setPosition(geoPoints.get(0));
+                            startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                            mapView.getOverlays().add(startMarker);
+                            Marker startMarker2 = new Marker(mapView);
+                            startMarker2.setPosition(geoPoints.get(geoPoints.size() - 1));
+                            startMarker2.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                            mapView.getOverlays().add(startMarker2);
+                            mapController.setCenter(geoPoints.get(0));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
