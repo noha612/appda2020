@@ -1,6 +1,7 @@
 package edu.ptit.vn.appda2020;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private MapView mapView = null;
     private Handler handler;
     private AutoSuggestAdapter autoSuggestAdapter;
+    TextView tv;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -162,6 +165,15 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
                 return false;
+            }
+        });
+
+
+         tv = findViewById(R.id.startClick);
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivityForResult(new Intent(MainActivity.this, FindLocationActivity.class),1);
             }
         });
     }
@@ -273,5 +285,13 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1){
+            tv.setText(data.getStringExtra("s"));
+        }
     }
 }
