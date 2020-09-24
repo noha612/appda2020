@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

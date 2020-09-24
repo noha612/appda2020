@@ -5,14 +5,17 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -25,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -33,25 +35,28 @@ import org.osmdroid.views.overlay.Polyline;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int TRIGGER_AUTO_COMPLETE = 100;
+    private static final long AUTO_COMPLETE_DELAY = 300;
     private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
-    private MapView mapView = null;
     IMapController mapController;
+    String host = "https://8e8658761c20.ngrok.io";
+    OkHttpClient client = new OkHttpClient();
+    String startId;
+    String finishId;
+    private MapView mapView = null;
+    private Handler handler;
+    private AutoSuggestAdapter autoSuggestAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
-        mapView = (MapView) findViewById(R.id.map);
+        mapView = findViewById(R.id.map);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapController = mapView.getController();
         mapController.setZoom(16L);
@@ -89,7 +94,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final EditText start = findViewById(R.id.start);
+        final AutoCompleteTextView start = findViewById(R.id.start);
+        String[] languages = {"Java ", "CSharp", "Visual Basic"};
+        autoSuggestAdapter = new AutoSuggestAdapter(this,
+                android.R.layout.simple_dropdown_item_1line);
+        start.setThreshold(2);
+        start.setAdapter(autoSuggestAdapter);
         final EditText finish = findViewById(R.id.finish);
 
         start.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -106,38 +116,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        final long delay = 1000; // 1 seconds after user stops typing
-//        final long[] last_text_edit = {0};
-//        final Handler handler = new Handler();
-//
-//        final Runnable input_finish_checker = new Runnable() {
-//            public void run() {
-//                if (System.currentTimeMillis() > (last_text_edit[0] + delay - 500)) {
-//                    Toast.makeText(MainActivity.this, "stop typing...", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        };
-//        start.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                handler.removeCallbacks(input_finish_checker);
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                //avoid triggering event when text is empty
-//                if (s.length() > 0) {
-//                    last_text_edit[0] = System.currentTimeMillis();
-//                    handler.postDelayed(  input_finish_checker, delay);
-//                } else {
-//
-//                }
-//            }
-//        });
+        start.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int
+                    count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before,
+                                      int count) {
+                handler.removeMessages(TRIGGER_AUTO_COMPLETE);
+                handler.sendEmptyMessageDelayed(TRIGGER_AUTO_COMPLETE,
+                        AUTO_COMPLETE_DELAY);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                if (msg.what == TRIGGER_AUTO_COMPLETE) {
+                    if (!TextUtils.isEmpty(start.getText())) {
+                        String[] stringList = {"Java ", "Swift", "Visual Basic"};
+                        autoSuggestAdapter.setData(Arrays.asList(stringList));
+                        autoSuggestAdapter.notifyDataSetChanged();
+                    }
+                }
+                return false;
+            }
+        });
 
         finish.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -155,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case 1: {
                 if (!(grantResults.length > 0
@@ -166,12 +178,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
-    String host = "https://88eecdaa4c47.ngrok.io";
-    OkHttpClient client = new OkHttpClient();
-    String startId;
-    String finishId;
 
     private void getId(final EditText edt, final String idType) {
         HttpUrl.Builder httpBuilder = HttpUrl.parse(host + "/da2020/v1/findStation").newBuilder();
