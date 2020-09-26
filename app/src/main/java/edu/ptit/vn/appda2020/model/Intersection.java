@@ -1,6 +1,8 @@
 package edu.ptit.vn.appda2020.model;
 
-public class Intersection {
+import java.io.Serializable;
+
+public class Intersection implements Serializable {
     private String id;
     private String name;
     private double latitude;
