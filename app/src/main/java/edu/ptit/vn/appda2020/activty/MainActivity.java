@@ -1,4 +1,4 @@
-package edu.ptit.vn.appda2020;
+package edu.ptit.vn.appda2020.activty;
 
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.ptit.vn.appda2020.model.Intersection;
+import edu.ptit.vn.appda2020.model.Location;
+import edu.ptit.vn.appda2020.R;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -39,15 +42,64 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
     IMapController mapController;
     OkHttpClient client = new OkHttpClient();
-    private MapView mapView = null;
+    MapView mapView;
     Button findRouteBtn;
     TextView startClick;
     TextView finishClick;
+    Location startLocation;
+    Location finishLocation;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initMap();
+
+        findRouteBtn = findViewById(R.id.button);
+        findRouteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (startLocation != null && finishLocation != null) {
+                    getRoute(startLocation.getIntersection().getId(), finishLocation.getIntersection().getId());
+                }
+            }
+        });
+
+        startClick = findViewById(R.id.startClick);
+        startClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, FindLocationActivity.class);
+                intent.putExtra("requestCode", 1);
+                startActivityForResult(intent, 1);
+            }
+        });
+
+        finishClick = findViewById(R.id.finishClick);
+        finishClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, FindLocationActivity.class);
+                intent.putExtra("requestCode", 2);
+                startActivityForResult(intent, 2);
+            }
+        });
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == 1) {
+            if (!(grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+                Toast.makeText(this, "Permission denied to access your location.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void initMap() {
 
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
@@ -72,54 +124,13 @@ public class MainActivity extends AppCompatActivity {
         line.setPoints(geoPoints);
         mapView.getOverlayManager().add(line);
 
-        findRouteBtn = findViewById(R.id.button);
-        findRouteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getRoute();
-            }
-        });
-
-        startClick = findViewById(R.id.startClick);
-        startClick.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent =new Intent(MainActivity.this, FindLocationActivity.class);
-                intent.putExtra("requestCode",1);
-                startActivityForResult(intent, 1);
-            }
-        });
-
-        finishClick = findViewById(R.id.finishClick);
-        finishClick.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent =new Intent(MainActivity.this, FindLocationActivity.class);
-                intent.putExtra("requestCode",2);
-                startActivityForResult(intent, 2);
-            }
-        });
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-                if (!(grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
-                    Toast.makeText(this, "Permission denied to access your location.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
     }
 
 
-    private void getRoute() {
+    private void getRoute(String startId, String finishId) {
         HttpUrl.Builder httpBuilder = HttpUrl.parse(getString(R.string.server_uri) + getString(R.string.api_route)).newBuilder();
-//        httpBuilder.addQueryParameter("startId", startId);
-//        httpBuilder.addQueryParameter("finishId", finishId);
+        httpBuilder.addQueryParameter("startId", startId);
+        httpBuilder.addQueryParameter("finishId", finishId);
         Request request = new Request.Builder().get()
                 .url(httpBuilder.build())
                 .build();
@@ -171,8 +182,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null) {
+            Location location = (Location) data.getSerializableExtra("location");
             if (requestCode == 1) {
-                startClick.setText(data.getStringExtra("s"));
+                startLocation = location;
+                startClick.setText(startLocation.getName());
 //            GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
 //            Marker startMarker = new Marker(mapView);
 //            startMarker.setPosition(gp);
@@ -182,7 +195,8 @@ public class MainActivity extends AppCompatActivity {
 //            mapController.setZoom(18L);
             }
             if (requestCode == 2) {
-                finishClick.setText(data.getStringExtra("s"));
+                finishLocation = location;
+                finishClick.setText(finishLocation.getName());
             }
         }
     }

@@ -1,4 +1,4 @@
-package edu.ptit.vn.appda2020;
+package edu.ptit.vn.appda2020.adapter;
 
 import android.content.Context;
 import android.widget.ArrayAdapter;

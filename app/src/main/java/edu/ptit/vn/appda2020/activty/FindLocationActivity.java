@@ -1,4 +1,4 @@
-package edu.ptit.vn.appda2020;
+package edu.ptit.vn.appda2020.activty;
 
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +26,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import edu.ptit.vn.appda2020.adapter.AutoSuggestAdapter;
+import edu.ptit.vn.appda2020.model.Location;
+import edu.ptit.vn.appda2020.R;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -39,6 +42,7 @@ public class FindLocationActivity extends AppCompatActivity {
     private Handler handler;
     private AutoSuggestAdapter autoSuggestAdapter;
     AutoCompleteTextView input;
+    Location[] locations;
     String[] stringList;
     OkHttpClient client = new OkHttpClient();
     String searchResult;
@@ -79,7 +83,7 @@ public class FindLocationActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 searchResult = stringList[i];
                 Intent intent = new Intent();
-                intent.putExtra("s", searchResult);
+                intent.putExtra("location", locations[i]);
                 setResult(getIntent().getIntExtra("requestCode", 0), intent);
                 finish();
             }
@@ -136,7 +140,7 @@ public class FindLocationActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String json = response.body().string();
-                final Location[] locations = new ObjectMapper().readValue(json, Location[].class);
+                locations = new ObjectMapper().readValue(json, Location[].class);
                 ArrayList<String> names = new ArrayList<>();
                 for (Location location : locations) names.add(location.getName());
                 stringList = new String[names.size()];
@@ -146,7 +150,10 @@ public class FindLocationActivity extends AppCompatActivity {
                     public void run() {
                         if (isSearchIconClick) {
                             searchResult = stringList[0];
-                            input.setText(searchResult);
+                            Intent intent = new Intent();
+                            intent.putExtra("location", locations[0]);
+                            setResult(getIntent().getIntExtra("requestCode", 0), intent);
+                            finish();
                         } else {
                             autoSuggestAdapter.setData(Arrays.asList(stringList));
                             autoSuggestAdapter.notifyDataSetChanged();

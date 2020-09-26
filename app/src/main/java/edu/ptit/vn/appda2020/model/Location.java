@@ -1,6 +1,8 @@
-package edu.ptit.vn.appda2020;
+package edu.ptit.vn.appda2020.model;
 
-public class Location {
+import java.io.Serializable;
+
+public class Location implements Serializable {
     private String name;
     private Intersection intersection;
 

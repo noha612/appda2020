@@ -6,6 +6,8 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import edu.ptit.vn.appda2020.activty.MainActivity;
+
 public class Splash extends AppCompatActivity {
 
     @Override

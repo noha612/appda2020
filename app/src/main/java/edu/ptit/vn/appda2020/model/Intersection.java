@@ -1,4 +1,4 @@
-package edu.ptit.vn.appda2020;
+package edu.ptit.vn.appda2020.model;
 
 public class Intersection {
     private String id;
