@@ -5,20 +5,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +27,6 @@ import org.osmdroid.views.overlay.Polyline;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import okhttp3.Call;
@@ -48,18 +37,12 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int TRIGGER_AUTO_COMPLETE = 100;
-    private static final long AUTO_COMPLETE_DELAY = 300;
-    private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     IMapController mapController;
-    String host = "https://8e8658761c20.ngrok.io";
     OkHttpClient client = new OkHttpClient();
-    String startId;
-    String finishId;
     private MapView mapView = null;
-    private Handler handler;
-    private AutoSuggestAdapter autoSuggestAdapter;
-    TextView tv;
+    Button findRouteBtn;
+    TextView startClick;
+    TextView finishClick;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,93 +72,34 @@ public class MainActivity extends AppCompatActivity {
         line.setPoints(geoPoints);
         mapView.getOverlayManager().add(line);
 
-        Button btn = findViewById(R.id.button);
-        btn.setOnClickListener(new View.OnClickListener() {
+        findRouteBtn = findViewById(R.id.button);
+        findRouteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getRoute();
             }
         });
 
-        final AutoCompleteTextView start = findViewById(R.id.start);
-        String[] languages = {"Java ", "CSharp", "Visual Basic"};
-        autoSuggestAdapter = new AutoSuggestAdapter(this,
-                android.R.layout.simple_dropdown_item_1line);
-        start.setThreshold(2);
-        start.setAdapter(autoSuggestAdapter);
-        final EditText finish = findViewById(R.id.finish);
-
-        start.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    start.clearFocus();
-                    InputMethodManager in = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    in.hideSoftInputFromWindow(start.getWindowToken(), 0);
-                    getId(start, "start");
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        start.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int
-                    count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before,
-                                      int count) {
-                handler.removeMessages(TRIGGER_AUTO_COMPLETE);
-                handler.sendEmptyMessageDelayed(TRIGGER_AUTO_COMPLETE,
-                        AUTO_COMPLETE_DELAY);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        handler = new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message msg) {
-                if (msg.what == TRIGGER_AUTO_COMPLETE) {
-                    if (!TextUtils.isEmpty(start.getText())) {
-                        String[] stringList = {"Java ", "Swift", "Visual Basic"};
-                        autoSuggestAdapter.setData(Arrays.asList(stringList));
-                        autoSuggestAdapter.notifyDataSetChanged();
-                    }
-                }
-                return false;
-            }
-        });
-
-        finish.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    finish.clearFocus();
-                    InputMethodManager in = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    in.hideSoftInputFromWindow(start.getWindowToken(), 0);
-                    getId(finish, "finish");
-                    return true;
-                }
-                return false;
-            }
-        });
-
-
-         tv = findViewById(R.id.startClick);
-        tv.setOnClickListener(new View.OnClickListener() {
+        startClick = findViewById(R.id.startClick);
+        startClick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityForResult(new Intent(MainActivity.this, FindLocationActivity.class),1);
+                Intent intent =new Intent(MainActivity.this, FindLocationActivity.class);
+                intent.putExtra("requestCode",1);
+                startActivityForResult(intent, 1);
             }
         });
+
+        finishClick = findViewById(R.id.finishClick);
+        finishClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent =new Intent(MainActivity.this, FindLocationActivity.class);
+                intent.putExtra("requestCode",2);
+                startActivityForResult(intent, 2);
+            }
+        });
+
     }
 
     @Override
@@ -191,55 +115,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getId(final EditText edt, final String idType) {
-        HttpUrl.Builder httpBuilder = HttpUrl.parse(host + "/da2020/v1/findStation").newBuilder();
-        httpBuilder.addQueryParameter("name", edt.getText().toString());
-        Request request = new Request.Builder().get()
-                .url(httpBuilder.build())
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("Error", "Network Error" + e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-                final String json = response.body().string();
-                final Location location = new ObjectMapper().readValue(json, Location.class);
-                if (idType.equals("start")) startId = location.getIntersection().getId();
-                else finishId = location.getIntersection().getId();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        edt.setText(location.getName());
-                        GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
-                        Marker startMarker = new Marker(mapView);
-                        startMarker.setPosition(gp);
-                        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                        mapView.getOverlays().add(startMarker);
-                        mapController.setCenter(gp);
-                        mapController.setZoom(18L);
-                        Toast.makeText(MainActivity.this, json, Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        });
-    }
 
     private void getRoute() {
-//        RequestBody body;
-//                    body = RequestBody.create(
-//                    MediaType.parse("application/json"),
-//                    new ObjectMapper().writeValueAsString(new User(username, password))
-//            );
-//            Request request = new Request.Builder().post(body)
-//                    .url(host + "/da2020/v1/findStation?name=ao")
-//                    .build();
-        HttpUrl.Builder httpBuilder = HttpUrl.parse(host + "/da2020/v1/findRoute").newBuilder();
-        httpBuilder.addQueryParameter("startId", startId);
-        httpBuilder.addQueryParameter("finishId", finishId);
+        HttpUrl.Builder httpBuilder = HttpUrl.parse(getString(R.string.server_uri) + getString(R.string.api_route)).newBuilder();
+//        httpBuilder.addQueryParameter("startId", startId);
+//        httpBuilder.addQueryParameter("finishId", finishId);
         Request request = new Request.Builder().get()
                 .url(httpBuilder.build())
                 .build();
@@ -290,8 +170,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==1){
-            tv.setText(data.getStringExtra("s"));
+        if (data != null) {
+            if (requestCode == 1) {
+                startClick.setText(data.getStringExtra("s"));
+//            GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
+//            Marker startMarker = new Marker(mapView);
+//            startMarker.setPosition(gp);
+//            startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+//            mapView.getOverlays().add(startMarker);
+//            mapController.setCenter(gp);
+//            mapController.setZoom(18L);
+            }
+            if (requestCode == 2) {
+                finishClick.setText(data.getStringExtra("s"));
+            }
         }
     }
 }

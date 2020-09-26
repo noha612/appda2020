@@ -8,53 +8,29 @@
         android:id="@+id/startClick"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Click here"/>
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:hint="Từ"
+        android:textSize="20sp" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/finishClick"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <AutoCompleteTextView
-            android:id="@+id/start"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Từ"
-            android:imeOptions="actionSearch"
-            android:inputType="text" />
-
-        <TextView
-            android:id="@+id/startId"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <EditText
-            android:id="@+id/finish"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Đến"
-            android:imeOptions="actionSearch"
-            android:inputType="text" />
-
-        <TextView
-            android:id="@+id/finishId"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="abc"/>
-    </LinearLayout>
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:hint="Đến"
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/button"
         style="@android:style/Widget.DeviceDefault.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="GO" />
+        android:text="Tìm đường" />
 
     <org.osmdroid.views.MapView
         android:id="@+id/map"
