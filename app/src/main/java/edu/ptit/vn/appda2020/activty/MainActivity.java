@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         mapView = findViewById(R.id.map);
-        mapView.setTileSource(TileSourceFactory.MAPNIK);
+        mapView.setTileSource(TileSourceFactory.HIKEBIKEMAP);
         mapController = mapView.getController();
         mapController.setZoom(16L);
         GeoPoint startPoint = new GeoPoint(20.9878278, 105.7963234);
