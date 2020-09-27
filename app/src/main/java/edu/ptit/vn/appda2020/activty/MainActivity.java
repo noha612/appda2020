@@ -29,9 +29,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.ptit.vn.appda2020.R;
 import edu.ptit.vn.appda2020.model.Intersection;
 import edu.ptit.vn.appda2020.model.Location;
-import edu.ptit.vn.appda2020.R;
+import edu.ptit.vn.appda2020.module.LocationFinder;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -48,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
     TextView finishClick;
     Location startLocation;
     Location finishLocation;
+    Thread thread;
+    Marker current;
+    Marker startMarker;
+    Marker finishMarker;
+    List<GeoPoint> route;
+    Polyline line;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,6 +93,44 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        current = new Marker(mapView);
+        thread = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    while (!thread.isInterrupted()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                LocationFinder finder;
+                                double longitude = 0.0, latitude = 0.0;
+                                finder = new LocationFinder(MainActivity.this, MainActivity.this);
+                                if (finder.canGetLocation()) {
+                                    latitude = finder.getLatitude();
+                                    longitude = finder.getLongitude();
+                                    GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+                                    current.setPosition(geoPoint);
+                                    current.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                                    current.setIcon(getResources().getDrawable(R.drawable.ic_baseline_directions_bike_24));
+                                    mapView.getOverlays().add(current);
+                                }
+                            }
+                        });
+                        Thread.sleep(2000);
+//                        mapView.getOverlays().remove(current);
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+
+        startMarker = new Marker(mapView);
+        finishMarker = new Marker(mapView);
+        route = new ArrayList<>();
+        line = new Polyline();
+
+        thread.start();
     }
 
     @Override
@@ -107,8 +152,15 @@ public class MainActivity extends AppCompatActivity {
         mapView.setTileSource(TileSourceFactory.HIKEBIKEMAP);
         mapController = mapView.getController();
         mapController.setZoom(16L);
-        GeoPoint startPoint = new GeoPoint(20.9878278, 105.7963234);
-        mapController.setCenter(startPoint);
+        LocationFinder finder;
+        double longitude = 0.0, latitude = 0.0;
+        finder = new LocationFinder(MainActivity.this, MainActivity.this);
+        if (finder.canGetLocation()) {
+            latitude = finder.getLatitude();
+            longitude = finder.getLongitude();
+            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+            mapController.setCenter(geoPoint);
+        }
 
         double minlat = 20.9677000, minlon = 105.7714000, maxlat = 20.9944000, maxlon = 105.8250000;
         List<GeoPoint> geoPoints = new ArrayList<>();
@@ -148,27 +200,18 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
+                            mapView.getOverlays().remove(line);
                             Intersection[] intersections = new ObjectMapper().readValue(json, Intersection[].class);
-                            List<GeoPoint> geoPoints = new ArrayList<>();
+                            route.clear();
                             for (Intersection i : intersections) {
-                                geoPoints.add(new GeoPoint(i.getLatitude(), i.getLongitude()));
+                                route.add(new GeoPoint(i.getLatitude(), i.getLongitude()));
                             }
-                            Polyline line = new Polyline();
-                            line.getOutlinePaint().setColor(Color.RED);
-                            line.setPoints(geoPoints);
-                            line.getOutlinePaint().setStrokeWidth(2.5F);
-                            mapView.getOverlayManager().clear();
+                            line.getOutlinePaint().setColor(Color.BLACK);
+                            line.setPoints(route);
+                            line.getOutlinePaint().setStrokeWidth(5F);
                             mapView.getOverlayManager().add(line);
-                            Marker startMarker = new Marker(mapView);
-
-                            startMarker.setPosition(geoPoints.get(0));
-                            startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                            mapView.getOverlays().add(startMarker);
-                            Marker startMarker2 = new Marker(mapView);
-                            startMarker2.setPosition(geoPoints.get(geoPoints.size() - 1));
-                            startMarker2.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                            mapView.getOverlays().add(startMarker2);
-                            mapController.setCenter(geoPoints.get(0));
+                            mapController.setCenter(route.get(route.size() / 2));
+                            mapController.setZoom(16L);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -184,19 +227,30 @@ public class MainActivity extends AppCompatActivity {
         if (data != null) {
             Location location = (Location) data.getSerializableExtra("location");
             if (requestCode == 1) {
+                mapView.getOverlays().remove(line);
                 startLocation = location;
                 startClick.setText(startLocation.getName());
-//            GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
-//            Marker startMarker = new Marker(mapView);
-//            startMarker.setPosition(gp);
-//            startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-//            mapView.getOverlays().add(startMarker);
-//            mapController.setCenter(gp);
-//            mapController.setZoom(18L);
+                GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
+                startMarker.setTitle(startLocation.getName());
+                startMarker.setPosition(gp);
+                startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                startMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_location_on_24));
+                mapView.getOverlays().add(startMarker);
+                mapController.setCenter(gp);
+                mapController.setZoom(18L);
             }
             if (requestCode == 2) {
+                mapView.getOverlays().remove(line);
                 finishLocation = location;
                 finishClick.setText(finishLocation.getName());
+                GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
+                finishMarker.setTitle(finishLocation.getName());
+                finishMarker.setPosition(gp);
+                finishMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                finishMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_where_to_vote_24));
+                mapView.getOverlays().add(finishMarker);
+                mapController.setCenter(gp);
+                mapController.setZoom(18L);
             }
         }
     }
