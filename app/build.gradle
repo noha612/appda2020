@@ -38,7 +38,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'org.osmdroid:osmdroid-android:6.1.9-SNAPSHOT'
+    implementation 'org.osmdroid:osmdroid-android:6.1.8'
     implementation 'com.github.MKergall:osmbonuspack:6.6.0'
     implementation 'com.squareup.okhttp3:okhttp:3.4.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
