@@ -2,6 +2,7 @@ package edu.ptit.vn.appda2020.activty;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,6 +17,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -26,13 +32,17 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import edu.ptit.vn.appda2020.R;
 import edu.ptit.vn.appda2020.model.Intersection;
 import edu.ptit.vn.appda2020.model.Location;
 import edu.ptit.vn.appda2020.module.LocationFinder;
+import edu.ptit.vn.appda2020.util.HaversineScorer;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -55,11 +65,16 @@ public class MainActivity extends AppCompatActivity {
     Marker finishMarker;
     List<GeoPoint> route;
     Polyline line;
+    Gson gson = new Gson();
+    FloatingActionButton fab;
+    View main;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        main = findViewById(R.id.main);
 
         initMap();
 
@@ -131,6 +146,23 @@ public class MainActivity extends AppCompatActivity {
         line = new Polyline();
 
         thread.start();
+
+        fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LocationFinder finder;
+                double longitude = 0.0, latitude = 0.0;
+                finder = new LocationFinder(MainActivity.this, MainActivity.this);
+                if (finder.canGetLocation()) {
+                    latitude = finder.getLatitude();
+                    longitude = finder.getLongitude();
+                    GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+                    mapController.setCenter(geoPoint);
+                    mapController.setZoom(19L);
+                }
+            }
+        });
     }
 
     @Override
@@ -208,10 +240,25 @@ public class MainActivity extends AppCompatActivity {
                             }
                             line.getOutlinePaint().setColor(Color.BLACK);
                             line.setPoints(route);
-                            line.getOutlinePaint().setStrokeWidth(5F);
+                            line.getOutlinePaint().setStrokeWidth(6F);
                             mapView.getOverlayManager().add(line);
                             mapController.setCenter(route.get(route.size() / 2));
                             mapController.setZoom(16L);
+
+                            //show distance
+                            double total = 0;
+                            for (int i = 0; i < intersections.length - 1; i++) {
+                                total += HaversineScorer.computeCost(intersections[i], intersections[i + 1]);
+                            }
+                            double roundOff = Math.round(total * 100.0) / 100.0;
+                            final Snackbar snackbar = Snackbar.make(main, roundOff + " km", BaseTransientBottomBar.LENGTH_INDEFINITE);
+                            snackbar.setAction("X", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackbar.dismiss();
+                                }
+                            });
+                            snackbar.show();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -226,6 +273,25 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null) {
             Location location = (Location) data.getSerializableExtra("location");
+            SharedPreferences sharedPreferences = getSharedPreferences("share", MODE_PRIVATE);
+            String his = sharedPreferences.getString("his", null);
+            Set<Location> listHis;
+            Type type = new TypeToken<Set<Location>>() {
+            }.getType();
+            if (his != null) {
+                listHis = gson.fromJson(his, type);
+            } else {
+                listHis = new LinkedHashSet<>();
+            }
+            for (Location i : listHis) {
+                if (i.getName().equalsIgnoreCase(location.getName())) {
+                    listHis.remove(i);
+                    break;
+                }
+            }
+            listHis.add(location);
+//            if (listHis.size() > 10) listHis.remove(0);
+            sharedPreferences.edit().putString("his", gson.toJson(listHis)).apply();
             if (requestCode == 1) {
                 mapView.getOverlays().remove(line);
                 startLocation = location;
