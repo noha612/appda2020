@@ -2,6 +2,7 @@ package edu.ptit.vn.appda2020.activty;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,17 +15,23 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 import edu.ptit.vn.appda2020.R;
 import edu.ptit.vn.appda2020.adapter.AutoSuggestAdapter;
@@ -47,10 +54,16 @@ public class FindLocationActivity extends AppCompatActivity {
     OkHttpClient client = new OkHttpClient();
     String searchResult;
 //hehe
+    Gson gson = new Gson();
+    Set<Location> listHis;
+    ListView listHisLV;
+    String[] names;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_location);
+
+        initHistory();
 
         input = findViewById(R.id.input);
         autoSuggestAdapter = new AutoSuggestAdapter(this,
@@ -122,6 +135,40 @@ public class FindLocationActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    private void initHistory() {
+        SharedPreferences sharedPreferences = getSharedPreferences("share", MODE_PRIVATE);
+        String his = sharedPreferences.getString("his", null);
+        if (his != null) {
+            Type type = new TypeToken<Set<Location>>() {
+            }.getType();
+            listHis = gson.fromJson(his, type);
+
+            listHisLV = findViewById(R.id.listHis);
+            names = new String[listHis.size()];
+            int i = listHis.size() - 1;
+            for (Location location : listHis) {
+                names[i] = location.getName();
+                i--;
+            }
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, names);
+            listHisLV.setAdapter(arrayAdapter);
+            listHisLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    for (Location location : listHis) {
+                        if(names[i] == location.getName()){
+                            Intent intent = new Intent();
+                            intent.putExtra("location", location);
+                            setResult(getIntent().getIntExtra("requestCode", 0), intent);
+                            finish();
+                        }
+                    }
+
+                }
+            });
+        }
     }
 
     //call api get locations

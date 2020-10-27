@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
@@ -9,7 +10,8 @@
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+        android:layout_height="fill_parent" >
+    </org.osmdroid.views.MapView>
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -94,6 +96,17 @@
             android:text=" Tìm đường "
             android:textStyle="normal" />
     </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="575dp"
+        android:src="@drawable/ic_baseline_explore_24"
+        app:backgroundTint="@color/gray"
+        tools:ignore="VectorDrawableCompat" />
 
 
 </FrameLayout>
