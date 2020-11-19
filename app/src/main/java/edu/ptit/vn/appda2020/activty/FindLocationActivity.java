@@ -55,11 +55,11 @@ public class FindLocationActivity extends AppCompatActivity {
     String[] stringList;
     OkHttpClient client = new OkHttpClient();
     String searchResult;
+//hehe
     Gson gson = new Gson();
     Set<Location> listHis;
     ListView listHisLV;
     String[] names;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
