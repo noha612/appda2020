@@ -31,10 +31,12 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import edu.ptit.vn.appda2020.R;
 import edu.ptit.vn.appda2020.adapter.AutoSuggestAdapter;
+import edu.ptit.vn.appda2020.model.Intersection;
 import edu.ptit.vn.appda2020.model.Location;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -158,7 +160,7 @@ public class FindLocationActivity extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     for (Location location : listHis) {
-                        if(names[i] == location.getName()){
+                        if (names[i] == location.getName()) {
                             Intent intent = new Intent();
                             intent.putExtra("location", location);
                             setResult(getIntent().getIntExtra("requestCode", 0), intent);
@@ -170,6 +172,8 @@ public class FindLocationActivity extends AppCompatActivity {
             });
         }
     }
+
+    String[] abc;
 
     //call api get locations
     private void getId(final boolean isSearchIconClick) {

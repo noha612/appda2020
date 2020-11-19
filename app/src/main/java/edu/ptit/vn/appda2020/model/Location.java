@@ -3,15 +3,27 @@ package edu.ptit.vn.appda2020.model;
 import java.io.Serializable;
 
 public class Location implements Serializable {
+    private String id;
     private String name;
-    private Intersection intersection;
+    private double latitude;
+    private double longitude;
 
     public Location() {
     }
 
-    public Location(String name, Intersection intersection) {
+    public Location(String id, String name, double latitude, double longitude) {
+        this.id = id;
         this.name = name;
-        this.intersection = intersection;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -22,19 +34,29 @@ public class Location implements Serializable {
         this.name = name;
     }
 
-    public Intersection getIntersection() {
-        return intersection;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setIntersection(Intersection intersection) {
-        this.intersection = intersection;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     @Override
     public String toString() {
         return "Location{" +
-                "name='" + name + '\'' +
-                ", intersection=" + intersection +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
                 '}';
     }
 }

@@ -25,7 +25,9 @@ import com.google.gson.reflect.TypeToken;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (startLocation != null && finishLocation != null) {
-                    getRoute(startLocation.getIntersection().getId(), finishLocation.getIntersection().getId());
+                    getRoute(startLocation.getId(), finishLocation.getId());
                 }
             }
         });
@@ -180,21 +182,29 @@ public class MainActivity extends AppCompatActivity {
 
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+
         mapView = findViewById(R.id.map);
-        mapView.setTileSource(TileSourceFactory.HIKEBIKEMAP);
+//        mapView.setTileSource(TileSourceFactory.HIKEBIKEMAP);
+        mapView.setTileSource(new XYTileSource(
+                "MySource",
+                0, 18, 256, ".png",
+                new String[]{"http://192.168.0.104:8081/styles/osm-bright/"}
+        ));
+        mapView.setTilesScaledToDpi(true);
         mapController = mapView.getController();
-        mapController.setZoom(16L);
+        mapController.setZoom(18L);
         LocationFinder finder;
         double longitude = 0.0, latitude = 0.0;
         finder = new LocationFinder(MainActivity.this, MainActivity.this);
         if (finder.canGetLocation()) {
             latitude = finder.getLatitude();
             longitude = finder.getLongitude();
-            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+//            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+            GeoPoint geoPoint = new GeoPoint(20.981406, 105.787729);
             mapController.setCenter(geoPoint);
         }
 
-        double minlat = 20.9677000, minlon = 105.7714000, maxlat = 20.9944000, maxlon = 105.8250000;
+        double minlat = 20.8710, minlon = 105.6002, maxlat = 21.1761, maxlon = 106.1393;
         List<GeoPoint> geoPoints = new ArrayList<>();
 
         geoPoints.add(new GeoPoint(minlat, minlon));
@@ -296,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
                 mapView.getOverlays().remove(line);
                 startLocation = location;
                 startClick.setText(startLocation.getName());
-                GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
+                GeoPoint gp = new GeoPoint(location.getLatitude(), location.getLongitude());
                 startMarker.setTitle(startLocation.getName());
                 startMarker.setPosition(gp);
                 startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -309,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
                 mapView.getOverlays().remove(line);
                 finishLocation = location;
                 finishClick.setText(finishLocation.getName());
-                GeoPoint gp = new GeoPoint(location.getIntersection().getLatitude(), location.getIntersection().getLongitude());
+                GeoPoint gp = new GeoPoint(location.getLatitude(), location.getLongitude());
                 finishMarker.setTitle(finishLocation.getName());
                 finishMarker.setPosition(gp);
                 finishMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
