@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Tìm Đường</string>
-    <string name="server_uri">http://192.168.0.104:8080</string>
-    <string name="api.locations">/da2020/v1/places</string>
-    <string name="api.route">/da2020/v1/routes</string>
+    <string name="server_uri">http://192.168.43.11:8888</string>
+    <string name="api.places">/da2020/v1/places</string>
+    <string name="api.locations">/da2020/v1/locations</string>
+    <string name="api.directions">/da2020/v1/directions</string>
 </resources>

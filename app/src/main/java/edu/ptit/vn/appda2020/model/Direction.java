@@ -1,5 +1,7 @@
 package edu.ptit.vn.appda2020.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Location {
-    GeoPoint marker;
-    GeoPoint h;
-    Place place;
+public class Direction {
+    private GeoPoint from;
+    private GeoPoint to;
+    private List<GeoPoint> route;
 }
