@@ -26,7 +26,6 @@ import com.google.gson.reflect.TypeToken;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
@@ -36,6 +35,7 @@ import org.osmdroid.views.overlay.Polyline;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +44,8 @@ import edu.ptit.vn.appda2020.R;
 import edu.ptit.vn.appda2020.model.Direction;
 import edu.ptit.vn.appda2020.model.Location;
 import edu.ptit.vn.appda2020.model.Place;
+import edu.ptit.vn.appda2020.module.APIService;
+import edu.ptit.vn.appda2020.module.ApiUtils;
 import edu.ptit.vn.appda2020.module.LocationFinder;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -54,7 +56,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     IMapController mapController;
-    OkHttpClient client = new OkHttpClient();
+    //    OkHttpClient client = new OkHttpClient();
     MapView mapView;
     Button findRouteBtn;
     TextView startClick;
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     String TAP_CODE = null;
 
     View mainTab;
+    APIService mAPIService;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
         main = findViewById(R.id.main);
 
         initMap();
+        mAPIService = ApiUtils.getAPIService(this);
+
 
         findRouteBtn = findViewById(R.id.button);
         findRouteBtn.setOnClickListener(new View.OnClickListener() {
@@ -220,11 +225,11 @@ public class MainActivity extends AppCompatActivity {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
 
         mapView = findViewById(R.id.map);
-        mapView.setTileSource(new XYTileSource(
-                "MySource",
-                0, 18, 256, ".png",
-                new String[]{"http://192.168.43.11:8081/styles/osm-bright/"}
-        ));
+//        mapView.setTileSource(new XYTileSource(
+//                "MySource",
+//                0, 18, 256, ".png",
+//                new String[]{"http://192.168.43.11:8081/styles/osm-bright/"}
+//        ));
         mapView.setTilesScaledToDpi(true);
         mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mapController = mapView.getController();
@@ -258,83 +263,83 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void getRoute(String startId, String finishId) {
-        HttpUrl.Builder httpBuilder = HttpUrl.parse(getString(R.string.server_uri) + getString(R.string.api_directions)).newBuilder();
-        httpBuilder.addQueryParameter("fromId", startId);
-        httpBuilder.addQueryParameter("toId", finishId);
-        Request request = new Request.Builder().get()
-                .url(httpBuilder.build())
-                .build();
-        client.newCall(request).enqueue(new Callback() {
+
+        mAPIService.getDirections(startId, finishId).enqueue(new retrofit2.Callback<Direction>() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("Error", "Network Error" + e);
-            }
+            public void onResponse(retrofit2.Call<Direction> call, retrofit2.Response<Direction> response) {
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-                final String json = response.body().string();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mapView.getOverlays().remove(walkFrom);
-                        mapView.getOverlays().remove(line);
-                        mapView.getOverlays().remove(walkTo);
-                        Direction direction = gson.fromJson(json, Direction.class);
-                        lstGPWalkFrom.clear();
-                        route.clear();
-                        lstGPWalkTo.clear();
-
-                        //dashed 1
-                        lstGPWalkFrom.add(new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng()));
-                        lstGPWalkFrom.add(new GeoPoint(from.getH().getLat(), from.getH().getLng()));
-                        walkFrom.setPoints(lstGPWalkFrom);
-                        walkFrom.getOutlinePaint().setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
-
-                        //route line
-                        route.add(new GeoPoint(from.getH().getLat(), from.getH().getLng()));
-                        for (edu.ptit.vn.appda2020.model.GeoPoint i : direction.getRoute()) {
-                            route.add(new GeoPoint(i.getLat(), i.getLng()));
-                        }
-                        route.add(new GeoPoint(to.getH().getLat(), to.getH().getLng()));
-
-                        //checking...
+                if (response.isSuccessful()) {
+                    Log.i("TAG", "post submitted to API." + response.toString());
 
 
-                        line.getOutlinePaint().setColor(Color.BLACK);
-                        line.setPoints(route);
-                        line.getOutlinePaint().setStrokeWidth(6F);
+                    final Direction direction = response.body();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mapView.getOverlays().remove(walkFrom);
+                            mapView.getOverlays().remove(line);
+                            mapView.getOverlays().remove(walkTo);
+                            lstGPWalkFrom.clear();
+                            route.clear();
+                            lstGPWalkTo.clear();
 
-                        //dashed 2
-                        lstGPWalkTo.add(new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng()));
-                        lstGPWalkTo.add(new GeoPoint(to.getH().getLat(), to.getH().getLng()));
-                        walkTo.setPoints(lstGPWalkTo);
-                        walkTo.getOutlinePaint().setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
+                            //dashed 1
+                            lstGPWalkFrom.add(new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng()));
+                            lstGPWalkFrom.add(new GeoPoint(from.getH().getLat(), from.getH().getLng()));
+                            walkFrom.setPoints(lstGPWalkFrom);
+                            walkFrom.getOutlinePaint().setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
 
-                        //draw
-                        mapView.getOverlayManager().add(walkFrom);
-                        mapView.getOverlayManager().add(line);
-                        mapView.getOverlayManager().add(walkTo);
+                            //route line
+                            route.add(new GeoPoint(from.getH().getLat(), from.getH().getLng()));
+                            for (edu.ptit.vn.appda2020.model.GeoPoint i : direction.getRoute()) {
+                                route.add(new GeoPoint(i.getLat(), i.getLng()));
+                            }
+                            route.add(new GeoPoint(to.getH().getLat(), to.getH().getLng()));
 
-                        mapController.setCenter(route.get(route.size() / 2));
-                        mapController.setZoom(16L);
+                            //checking...
 
-                        //show distance
-                        double total = 0;
+
+                            line.getOutlinePaint().setColor(Color.BLACK);
+                            line.setPoints(route);
+                            line.getOutlinePaint().setStrokeWidth(6F);
+
+                            //dashed 2
+                            lstGPWalkTo.add(new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng()));
+                            lstGPWalkTo.add(new GeoPoint(to.getH().getLat(), to.getH().getLng()));
+                            walkTo.setPoints(lstGPWalkTo);
+                            walkTo.getOutlinePaint().setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
+
+                            //draw
+                            mapView.getOverlayManager().add(walkFrom);
+                            mapView.getOverlayManager().add(line);
+                            mapView.getOverlayManager().add(walkTo);
+
+                            mapController.setCenter(route.get(route.size() / 2));
+                            mapController.setZoom(16L);
+
+                            //show distance
+                            double total = 0;
 //                        for (int i = 1; i < route.size() - 2; i++) {
 //                            total += HaversineScorer.computeCost(direction.getRoute().get(i), direction.getRoute().get(i + 1));
 //                        }
-                        double roundOff = Math.round(total * 100.0) / 100.0;
-                        final Snackbar snackbar = Snackbar.make(main, roundOff + " km", BaseTransientBottomBar.LENGTH_INDEFINITE);
-                        snackbar.setAction("X", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                snackbar.dismiss();
-                            }
-                        });
-                        snackbar.show();
-                    }
-                });
+                            double roundOff = Math.round(total * 100.0) / 100.0;
+                            final Snackbar snackbar = Snackbar.make(main, roundOff + " km", BaseTransientBottomBar.LENGTH_INDEFINITE);
+                            snackbar.setAction("X", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackbar.dismiss();
+                                }
+                            });
+                            snackbar.show();
+                        }
+                    });
+                }
+
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<Direction> call, Throwable t) {
+
             }
         });
     }
@@ -401,27 +406,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void tapToChooseLocation(final GeoPoint gp) {
-        HttpUrl.Builder httpBuilder = HttpUrl.parse(getString(R.string.server_uri) + getString(R.string.api_locations)).newBuilder();
-        httpBuilder.addQueryParameter("lat", gp.getLatitude() + "");
-        httpBuilder.addQueryParameter("lng", gp.getLongitude() + "");
-        Request request = new Request.Builder().get()
-                .url(httpBuilder.build())
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e("Error", "Network Error" + e);
-            }
 
+        mAPIService.getLocations(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Location>() {
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-                final String json = response.body().string();
+            public void onResponse(retrofit2.Call<Location> call, final retrofit2.Response<Location> response) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         if (TAP_CODE.equals("FROM")) {
-                            from = gson.fromJson(json, Location.class);
+                            from = response.body();
                             startClick.setText(from.getPlace().getId());
                             GeoPoint gp = new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng());
                             fromMarker.setPosition(gp);
@@ -432,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
                             mapController.setZoom(18L);
                         }
                         if (TAP_CODE.equals("TO")) {
-                            to = gson.fromJson(json, Location.class);
+                            to = response.body();
                             finishClick.setText(to.getPlace().getId());
                             GeoPoint gp = new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng());
                             toMarker.setPosition(gp);
@@ -446,9 +439,14 @@ public class MainActivity extends AppCompatActivity {
                         mainTab.setVisibility(View.VISIBLE);
                     }
                 });
+
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<Location> call, Throwable t) {
+
             }
         });
-
     }
 
 }

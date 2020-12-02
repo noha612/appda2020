@@ -45,9 +45,7 @@ public class FindLocationActivity extends AppCompatActivity {
     TextView tap;
     Place[] places;
     String[] stringList;
-    OkHttpClient client = new OkHttpClient();
     String searchResult;
-    //hehe
     Gson gson = new Gson();
     Set<Place> listHis;
     ListView listHisLV;
@@ -63,7 +61,7 @@ public class FindLocationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_find_location);
 
         initHistory();
-        mAPIService = ApiUtils.getAPIService();
+        mAPIService = ApiUtils.getAPIService(this);
 
         input = findViewById(R.id.input);
         autoSuggestAdapter = new AutoSuggestAdapter(this,
@@ -179,52 +177,6 @@ public class FindLocationActivity extends AppCompatActivity {
             });
         }
     }
-
-    //    call api get locations
-//    private void getId(final boolean isSearchIconClick) {
-//        HttpUrl.Builder httpBuilder = HttpUrl.parse(getString(R.string.server_uri) + getString(R.string.api_places)).newBuilder();
-//        httpBuilder.addQueryParameter("name", input.getText().toString());
-//        Request request = new Request.Builder().get()
-//                .url(httpBuilder.build())
-//                .build();
-//        client.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                Log.e("Error", "Network Error" + e);
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                final String json = response.body().string();
-//                try {
-//                    places = new ObjectMapper().readValue(json, Place[].class);
-//                    ArrayList<String> names = new ArrayList<>();
-//                    for (Place place : places) names.add(place.getName());
-//                    stringList = new String[names.size()];
-//                    stringList = names.toArray(stringList);
-//                } catch (Exception e) {
-//                    ArrayList<String> names = new ArrayList<>();
-//                    stringList = new String[names.size()];
-//                    stringList = names.toArray(stringList);
-//                }
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        if (isSearchIconClick) {
-//                            searchResult = stringList[0];
-//                            Intent intent = new Intent();
-//                            intent.putExtra("location", places[0]);
-//                            setResult(getIntent().getIntExtra("requestCode", 0), intent);
-//                            finish();
-//                        } else {
-//                            autoSuggestAdapter.setData(Arrays.asList(stringList));
-//                            autoSuggestAdapter.notifyDataSetChanged();
-//                        }
-//                    }
-//                });
-//            }
-//        });
-//    }
 
     public void getId(final boolean isSearchIconClick) {
         mAPIService.getPlaces(input.getText().toString()).enqueue(new retrofit2.Callback<Place[]>() {

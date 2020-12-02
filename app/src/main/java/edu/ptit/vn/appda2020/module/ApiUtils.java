@@ -1,14 +1,17 @@
 package edu.ptit.vn.appda2020.module;
 
+import android.content.Context;
+
+import edu.ptit.vn.appda2020.R;
+
 public class ApiUtils {
 
-    public static final String BASE_URL = "http://192.168.43.11:8888/";
 
     private ApiUtils() {
     }
 
-    public static APIService getAPIService() {
-
-        return RetrofitClient.getClient(BASE_URL).create(APIService.class);
+    public static APIService getAPIService(Context context) {
+        String baseUrl = context.getString(R.string.server_url);
+        return RetrofitClient.getClient(baseUrl).create(APIService.class);
     }
 }
