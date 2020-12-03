@@ -1,4 +1,4 @@
-package edu.ptit.vn.appda2020.model;
+package edu.ptit.vn.appda2020.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

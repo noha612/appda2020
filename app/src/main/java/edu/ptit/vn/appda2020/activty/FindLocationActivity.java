@@ -33,10 +33,9 @@ import java.util.Set;
 
 import edu.ptit.vn.appda2020.R;
 import edu.ptit.vn.appda2020.adapter.AutoSuggestAdapter;
-import edu.ptit.vn.appda2020.model.Place;
-import edu.ptit.vn.appda2020.module.APIService;
-import edu.ptit.vn.appda2020.module.ApiUtils;
-import okhttp3.OkHttpClient;
+import edu.ptit.vn.appda2020.model.dto.Place;
+import edu.ptit.vn.appda2020.retrofit.APIService;
+import edu.ptit.vn.appda2020.retrofit.ApiUtils;
 
 public class FindLocationActivity extends AppCompatActivity {
     private static final int TRIGGER_AUTO_COMPLETE = 100;

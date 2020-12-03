@@ -1,6 +1,7 @@
-package edu.ptit.vn.appda2020.model;
+package edu.ptit.vn.appda2020.model.dto;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,5 +13,6 @@ import lombok.NoArgsConstructor;
 public class Direction {
     private GeoPoint from;
     private GeoPoint to;
-    private List<GeoPoint> route;
+    private List<Junction> junctions;
+    private Map<String,Integer> traffics;
 }

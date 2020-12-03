@@ -1,4 +1,4 @@
-package edu.ptit.vn.appda2020.module;
+package edu.ptit.vn.appda2020.util;
 
 import android.Manifest;
 import android.app.Activity;

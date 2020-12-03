@@ -32,27 +32,20 @@ import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import edu.ptit.vn.appda2020.R;
-import edu.ptit.vn.appda2020.model.Direction;
-import edu.ptit.vn.appda2020.model.Location;
-import edu.ptit.vn.appda2020.model.Place;
-import edu.ptit.vn.appda2020.module.APIService;
-import edu.ptit.vn.appda2020.module.ApiUtils;
-import edu.ptit.vn.appda2020.module.LocationFinder;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import edu.ptit.vn.appda2020.model.dto.Direction;
+import edu.ptit.vn.appda2020.model.dto.Junction;
+import edu.ptit.vn.appda2020.model.dto.Location;
+import edu.ptit.vn.appda2020.model.dto.Place;
+import edu.ptit.vn.appda2020.retrofit.APIService;
+import edu.ptit.vn.appda2020.retrofit.ApiUtils;
+import edu.ptit.vn.appda2020.util.LocationFinder;
 
 public class MainActivity extends AppCompatActivity {
     IMapController mapController;
@@ -291,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
 
                             //route line
                             route.add(new GeoPoint(from.getH().getLat(), from.getH().getLng()));
-                            for (edu.ptit.vn.appda2020.model.GeoPoint i : direction.getRoute()) {
+                            for (Junction i : direction.getJunctions()) {
                                 route.add(new GeoPoint(i.getLat(), i.getLng()));
                             }
                             route.add(new GeoPoint(to.getH().getLat(), to.getH().getLng()));
@@ -371,8 +364,8 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == 1) {
                 mapView.getOverlays().remove(line);
                 from.setPlace(place);
-                from.setMarker(new edu.ptit.vn.appda2020.model.GeoPoint(place.getLatitude(), place.getLongitude()));
-                from.setH(new edu.ptit.vn.appda2020.model.GeoPoint(place.getLatitude(), place.getLongitude()));
+                from.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLatitude(), place.getLongitude()));
+                from.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLatitude(), place.getLongitude()));
                 startClick.setText(place.getName());
                 GeoPoint gp = new GeoPoint(place.getLatitude(), place.getLongitude());
                 fromMarker.setTitle(place.getName());
@@ -386,8 +379,8 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == 2) {
                 mapView.getOverlays().remove(line);
                 to.setPlace(place);
-                to.setMarker(new edu.ptit.vn.appda2020.model.GeoPoint(place.getLatitude(), place.getLongitude()));
-                to.setH(new edu.ptit.vn.appda2020.model.GeoPoint(place.getLatitude(), place.getLongitude()));
+                to.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLatitude(), place.getLongitude()));
+                to.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLatitude(), place.getLongitude()));
                 finishClick.setText(place.getName());
                 GeoPoint gp = new GeoPoint(place.getLatitude(), place.getLongitude());
                 toMarker.setTitle(place.getName());

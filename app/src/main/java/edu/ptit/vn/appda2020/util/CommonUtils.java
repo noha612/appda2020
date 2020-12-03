@@ -1,11 +1,11 @@
 package edu.ptit.vn.appda2020.util;
 
 
-import edu.ptit.vn.appda2020.model.GeoPoint;
+import edu.ptit.vn.appda2020.model.dto.GeoPoint;
 
-public class HaversineScorer {
-    public static double computeCost(GeoPoint from, GeoPoint to) {
-        double R = 6372.8; // In kilometers
+public class CommonUtils {
+    public static double haversineFomular(GeoPoint from, GeoPoint to) {
+        double R = 6372.8;
 
         double dLat = Math.toRadians(to.getLat() - from.getLat());
         double dLon = Math.toRadians(to.getLng() - from.getLng());

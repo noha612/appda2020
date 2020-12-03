@@ -1,4 +1,4 @@
-package edu.ptit.vn.appda2020.module;
+package edu.ptit.vn.appda2020.retrofit;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

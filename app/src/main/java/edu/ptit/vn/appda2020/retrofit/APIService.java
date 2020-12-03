@@ -1,8 +1,8 @@
-package edu.ptit.vn.appda2020.module;
+package edu.ptit.vn.appda2020.retrofit;
 
-import edu.ptit.vn.appda2020.model.Direction;
-import edu.ptit.vn.appda2020.model.Location;
-import edu.ptit.vn.appda2020.model.Place;
+import edu.ptit.vn.appda2020.model.dto.Direction;
+import edu.ptit.vn.appda2020.model.dto.Location;
+import edu.ptit.vn.appda2020.model.dto.Place;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
