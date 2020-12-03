@@ -1,4 +1,4 @@
-package edu.ptit.vn.appda2020;
+package edu.ptit.vn.appda2020.activty;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import edu.ptit.vn.appda2020.activty.MainActivity;
+import edu.ptit.vn.appda2020.R;
 
 public class Splash extends AppCompatActivity {
 

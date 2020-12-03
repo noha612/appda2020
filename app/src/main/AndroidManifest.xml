@@ -23,7 +23,7 @@
         <activity
             android:name=".activty.FindLocationActivity"
             android:windowSoftInputMode="adjustResize|adjustPan" />
-        <activity android:name=".Splash">
+        <activity android:name=".activty.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
