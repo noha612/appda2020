@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -50,11 +51,11 @@ public class ExpActivity extends AppCompatActivity {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
 
         mapView = findViewById(R.id.map);
-//        mapView.setTileSource(new XYTileSource(
-//                "MySource",
-//                0, 18, 256, ".png",
-//                new String[]{"http://192.168.43.11:8081/styles/osm-bright/"}
-//        ));
+        mapView.setTileSource(new XYTileSource(
+                "MySource",
+                0, 18, 256, ".png",
+                new String[]{"http://192.168.43.11:8081/styles/osm-bright/"}
+        ));
         mapView.setTilesScaledToDpi(true);
         mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mapController = mapView.getController();
@@ -62,30 +63,50 @@ public class ExpActivity extends AppCompatActivity {
         GeoPoint geoPoint = new GeoPoint(20.981406, 105.787729);
         mapController.setCenter(geoPoint);
 
+        try {
+            Marker gps = new Marker(mapView);
+            gps.setPosition(new GeoPoint(20.98052, 105.78748));
+            gps.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            gps.setTextLabelFontSize(50);
+            gps.setTextIcon("(lat, lng)");
+            mapView.getOverlays().add(gps);
 
-//        loadRawNode();
-//
-//        InputStream inputStream = ctx.getResources().openRawResource(R.raw.edge);
-//
-//        InputStreamReader inputreader = new InputStreamReader(inputStream);
-//        BufferedReader buffreader = new BufferedReader(inputreader);
-//        String line;
-//        try {
-//            while ((line = buffreader.readLine()) != null) {
-//                String[] arr = line.split(" ");
-//                List<GeoPoint> geoPoints = new ArrayList<>();
-//                geoPoints.add(new GeoPoint(listR.get(arr[0])[0], listR.get(arr[0])[1]));
-//                geoPoints.add(new GeoPoint(listR.get(arr[1])[0], listR.get(arr[1])[1]));
-//                s.add(arr[0]);
-//                s.add(arr[1]);
-//                Polyline pl = new Polyline();
-//                pl.getOutlinePaint().setColor(Color.RED);
-//                pl.setPoints(geoPoints);
-//                mapView.getOverlayManager().add(pl);
-//            }
-//        } catch (IOException e) {
-//        }
-//        for(String i : s){
+            List<GeoPoint> geoPoints = new ArrayList<>();
+            geoPoints.add(new GeoPoint(20.98052, 105.78748));
+            geoPoints.add(new GeoPoint(20.980255101489075, 105.78770278416259));
+            Polyline pl = new Polyline();
+            pl.getOutlinePaint().setColor(Color.BLACK);
+            pl.setPoints(geoPoints);
+            pl.getOutlinePaint().setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
+            mapView.getOverlayManager().add(pl);
+        } catch (Exception e) {
+
+        }
+
+
+        loadRawNode();
+
+        InputStream inputStream = ctx.getResources().openRawResource(R.raw.edge);
+
+        InputStreamReader inputreader = new InputStreamReader(inputStream);
+        BufferedReader buffreader = new BufferedReader(inputreader);
+        String line;
+        try {
+            while ((line = buffreader.readLine()) != null) {
+                String[] arr = line.split(" ");
+                List<GeoPoint> geoPoints = new ArrayList<>();
+                geoPoints.add(new GeoPoint(listR.get(arr[0])[0], listR.get(arr[0])[1]));
+                geoPoints.add(new GeoPoint(listR.get(arr[1])[0], listR.get(arr[1])[1]));
+                s.add(arr[0]);
+                s.add(arr[1]);
+                Polyline pl = new Polyline();
+                pl.getOutlinePaint().setColor(Color.RED);
+                pl.setPoints(geoPoints);
+                mapView.getOverlayManager().add(pl);
+            }
+        } catch (IOException e) {
+        }
+//        for (String i : s) {
 //            Marker gps = new Marker(mapView);
 //            gps.setPosition(new GeoPoint(listR.get(i)[0], listR.get(i)[1]));
 //            gps.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
