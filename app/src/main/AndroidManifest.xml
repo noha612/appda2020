@@ -20,6 +20,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
+        <activity android:name=".activty.ExpActivity"></activity>
         <activity
             android:name=".activty.FindLocationActivity"
             android:windowSoftInputMode="adjustResize|adjustPan" />

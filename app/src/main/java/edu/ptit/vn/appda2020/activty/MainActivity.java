@@ -49,7 +49,6 @@ import edu.ptit.vn.appda2020.util.LocationFinder;
 
 public class MainActivity extends AppCompatActivity {
     IMapController mapController;
-    //    OkHttpClient client = new OkHttpClient();
     MapView mapView;
     Button findRouteBtn;
     TextView startClick;
