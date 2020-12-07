@@ -363,10 +363,10 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == 1) {
                 mapView.getOverlays().remove(line);
                 from.setPlace(place);
-                from.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLatitude(), place.getLongitude()));
-                from.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLatitude(), place.getLongitude()));
+                from.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
+                from.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
                 startClick.setText(place.getName());
-                GeoPoint gp = new GeoPoint(place.getLatitude(), place.getLongitude());
+                GeoPoint gp = new GeoPoint(place.getLat(), place.getLng());
                 fromMarker.setTitle(place.getName());
                 fromMarker.setPosition(gp);
                 fromMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -378,10 +378,10 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == 2) {
                 mapView.getOverlays().remove(line);
                 to.setPlace(place);
-                to.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLatitude(), place.getLongitude()));
-                to.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLatitude(), place.getLongitude()));
+                to.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
+                to.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
                 finishClick.setText(place.getName());
-                GeoPoint gp = new GeoPoint(place.getLatitude(), place.getLongitude());
+                GeoPoint gp = new GeoPoint(place.getLat(), place.getLng());
                 toMarker.setTitle(place.getName());
                 toMarker.setPosition(gp);
                 toMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);

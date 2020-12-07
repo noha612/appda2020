@@ -2,61 +2,20 @@ package edu.ptit.vn.appda2020.model.dto;
 
 import java.io.Serializable;
 
-public class Place implements Serializable {
-    private String id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class Place extends GeoPoint implements Serializable{
     private String name;
-    private double latitude;
-    private double longitude;
+    private String id;
 
-    public Place() {
-    }
-
-    public Place(String id, String name, double latitude, double longitude) {
-        this.id = id;
+    public Place(String name, String id, Double lat, Double lng) {
+        super(lat, lng);
         this.name = name;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    @Override
-    public String toString() {
-        return "Location{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                '}';
     }
 }
