@@ -26,7 +26,7 @@ public class Splash extends AppCompatActivity {
                     Log.v("error", e.toString());
                 } finally {
 //                    Intent i = new Intent(Splash.this, MainActivity.class);
-                    Intent i = new Intent(Splash.this, ExpActivity.class);
+                    Intent i = new Intent(Splash.this, MainActivity.class);
                     startActivity(i);
                     finish();
                 }

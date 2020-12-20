@@ -13,12 +13,49 @@
         android:layout_height="fill_parent"></org.osmdroid.views.MapView>
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mức độ tắc nghẽn hiện tại?"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="24sp" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="#CCFFEB3B"
+            android:text="THẤP" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="#CCFFC107"
+            android:text="TRUNG BÌNH" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="#CCFF5722"
+            android:text="NGHIÊM TRỌNG" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/mainTab"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:background="@drawable/layout_bg"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -105,6 +142,7 @@
         android:layout_marginRight="15dp"
         android:layout_marginBottom="575dp"
         android:src="@drawable/ic_baseline_explore_24"
+        android:visibility="gone"
         app:backgroundTint="@color/gray"
         tools:ignore="VectorDrawableCompat" />
 

@@ -198,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
         mapView.getOverlays().add(OverlayEvents);
 
         mainTab = findViewById(R.id.mainTab);
+
     }
 
     @Override
@@ -225,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
         mapView.setTilesScaledToDpi(true);
         mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mapController = mapView.getController();
-        mapController.setZoom(18L);
+        mapController.setZoom(16L);
         LocationFinder finder;
         double longitude = 0.0, latitude = 0.0;
         finder = new LocationFinder(MainActivity.this, MainActivity.this);
@@ -233,21 +234,24 @@ public class MainActivity extends AppCompatActivity {
             latitude = finder.getLatitude();
             longitude = finder.getLongitude();
 //            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
-            GeoPoint geoPoint = new GeoPoint(20.981406, 105.787729);
+            GeoPoint geoPoint = new GeoPoint(20.9935828, 105.8061848);
             mapController.setCenter(geoPoint);
         }
 
         double minlat = 20.8710, minlon = 105.6002, maxlat = 21.1761, maxlon = 106.1393;
         List<GeoPoint> geoPoints = new ArrayList<>();
 
-        geoPoints.add(new GeoPoint(minlat, minlon));
-        geoPoints.add(new GeoPoint(minlat, maxlon));
-        geoPoints.add(new GeoPoint(maxlat, maxlon));
-        geoPoints.add(new GeoPoint(maxlat, minlon));
-        geoPoints.add(new GeoPoint(minlat, minlon));
+//        geoPoints.add(new GeoPoint(minlat, minlon));
+//        geoPoints.add(new GeoPoint(minlat, maxlon));
+//        geoPoints.add(new GeoPoint(maxlat, maxlon));
+//        geoPoints.add(new GeoPoint(maxlat, minlon));
+//        geoPoints.add(new GeoPoint(minlat, minlon));
+        geoPoints.add(new GeoPoint(20.9935828, 105.8061848));
+        geoPoints.add(new GeoPoint(20.9918061, 105.8036463));
 
         Polyline line = new Polyline();
         line.getOutlinePaint().setColor(Color.RED);
+        line.getOutlinePaint().setStrokeWidth(25F);
         line.setPoints(geoPoints);
         mapView.getOverlayManager().add(line);
 
