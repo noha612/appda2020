@@ -11,11 +11,13 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -27,6 +29,7 @@ import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
@@ -50,7 +53,10 @@ import edu.ptit.vn.appda2020.util.LocationFinder;
 public class MainActivity extends AppCompatActivity {
     IMapController mapController;
     MapView mapView;
+    CardView mainCard;
     Button findRouteBtn;
+    Button miniCardView;
+    Button expandCardView;
     TextView startClick;
     TextView finishClick;
     Location from;
@@ -66,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     Polyline walkFrom;
     Polyline walkTo;
     Gson gson = new Gson();
-    FloatingActionButton fab;
+    ImageView fab;
     View main;
     String TAP_CODE = null;
 
@@ -135,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                                     GeoPoint geoPoint = new GeoPoint(latitude, longitude);
                                     gps.setPosition(geoPoint);
                                     gps.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                                    gps.setIcon(getResources().getDrawable(R.drawable.ic_baseline_directions_bike_24));
+                                    gps.setIcon(getResources().getDrawable(R.drawable.ic_baseline_person_pin_24));
                                     mapView.getOverlays().add(gps);
                                 }
                             }
@@ -172,8 +178,9 @@ public class MainActivity extends AppCompatActivity {
                     latitude = finder.getLatitude();
                     longitude = finder.getLongitude();
                     GeoPoint geoPoint = new GeoPoint(latitude, longitude);
-                    mapController.setCenter(geoPoint);
-                    mapController.setZoom(19L);
+//                    mapController.setCenter(geoPoint);
+                    mapController.animateTo(geoPoint);
+                    mapController.setZoom(17L);
                 }
             }
         });
@@ -199,6 +206,30 @@ public class MainActivity extends AppCompatActivity {
 
         mainTab = findViewById(R.id.mainTab);
 
+        mainCard = findViewById(R.id.mainCard);
+
+        miniCardView = findViewById(R.id.miniCardView);
+        expandCardView = findViewById(R.id.expandCardView);
+        miniCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainCard.animate()
+                        .translationY(-mainCard.getHeight())
+                        .alpha(0.0f)
+                        .setDuration(300);
+                expandCardView.setVisibility(View.VISIBLE);
+            }
+        });
+        expandCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainCard.animate()
+                        .translationY(0)
+                        .alpha(1.0f)
+                        .setDuration(300);
+                expandCardView.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override
@@ -218,6 +249,7 @@ public class MainActivity extends AppCompatActivity {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
 
         mapView = findViewById(R.id.map);
+        mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.NEVER);
 //        mapView.setTileSource(new XYTileSource(
 //                "MySource",
 //                0, 18, 256, ".png",
@@ -254,6 +286,8 @@ public class MainActivity extends AppCompatActivity {
         line.getOutlinePaint().setStrokeWidth(25F);
         line.setPoints(geoPoints);
         mapView.getOverlayManager().add(line);
+
+        mapView.setMultiTouchControls(true);
 
     }
 
@@ -394,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
                 mapController.setCenter(gp);
                 mapController.setZoom(18L);
             }
-        } else {
+        } else if (resultCode == 1 || resultCode == 2) {
             mainTab.setVisibility(View.GONE);
             if (resultCode == 1) TAP_CODE = "FROM";
             if (resultCode == 2) TAP_CODE = "TO";
