@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     CardView mainCard;
     Button findRouteBtn;
     Button miniCardView;
+    Button alert;
     CardView expandCardView;
     TextView startClick;
     TextView finishClick;
@@ -168,6 +169,13 @@ public class MainActivity extends AppCompatActivity {
 
         miniCardView = findViewById(R.id.miniCardView);
         expandCardView = findViewById(R.id.expandCardView);
+        alert = findViewById(R.id.alert);
+        alert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SendAlertActivity.class));
+            }
+        });
         miniCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -178,6 +186,9 @@ public class MainActivity extends AppCompatActivity {
                 expandCardView.setVisibility(View.VISIBLE);
                 expandCardView.animate().rotationBy(-180)
                         .alpha(1.0f)
+                        .setDuration(200);
+                alert.animate()
+                        .translationY(-mainCard.getHeight())
                         .setDuration(200);
             }
         });
@@ -191,7 +202,9 @@ public class MainActivity extends AppCompatActivity {
                 expandCardView.animate().rotationBy(180)
                         .alpha(0.0f)
                         .setDuration(200);
-                ;
+                alert.animate()
+                        .translationY(0)
+                        .setDuration(200);
             }
         });
     }
@@ -226,29 +239,13 @@ public class MainActivity extends AppCompatActivity {
 //            PTIT
 //            GeoPoint geoPoint = new GeoPoint(20.9935828, 105.8061848);
 
-        double minlat = 20.8710, minlon = 105.6002, maxlat = 21.1761, maxlon = 106.1393;
-        List<GeoPoint> geoPoints = new ArrayList<>();
-
-//        geoPoints.add(new GeoPoint(minlat, minlon));
-//        geoPoints.add(new GeoPoint(minlat, maxlon));
-//        geoPoints.add(new GeoPoint(maxlat, maxlon));
-//        geoPoints.add(new GeoPoint(maxlat, minlon));
-//        geoPoints.add(new GeoPoint(minlat, minlon));
-        geoPoints.add(new GeoPoint(20.9935828, 105.8061848));
-        geoPoints.add(new GeoPoint(20.9918061, 105.8036463));
-
-        Polyline line = new Polyline();
-        line.getOutlinePaint().setColor(Color.RED);
-        line.getOutlinePaint().setStrokeWidth(25F);
-        line.setPoints(geoPoints);
-        mapView.getOverlayManager().add(line);
-
         mapView.setMultiTouchControls(true);
         gps = new MyLocationNewOverlay(new GpsMyLocationProvider(this), mapView);
         gps.enableMyLocation();
         gps.enableFollowLocation();
         gps.setPersonIcon(CommonUtils.getBitmapFromVectorDrawable(this, R.drawable.ic_baseline_person_pin_24));
         mapView.getOverlays().add(this.gps);
+        mapController.animateTo(gps.getMyLocation());
     }
 
 

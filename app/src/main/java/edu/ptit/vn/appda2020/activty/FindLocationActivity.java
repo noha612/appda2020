@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,7 @@ public class FindLocationActivity extends AppCompatActivity {
     private static final long AUTO_COMPLETE_DELAY = 300;
     AutoCompleteTextView input;
     TextView tap;
+    Button btnBack;
     Place[] places;
     String[] stringList;
     String searchResult;
@@ -50,7 +52,6 @@ public class FindLocationActivity extends AppCompatActivity {
     ListView listHisLV;
     String[] names;
     APIService mAPIService;
-    String[] abc;
     private Handler handler;
     private AutoSuggestAdapter autoSuggestAdapter;
 
@@ -138,6 +139,14 @@ public class FindLocationActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 setResult(getIntent().getIntExtra("requestCode", 0), null);
+                finish();
+            }
+        });
+
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 finish();
             }
         });

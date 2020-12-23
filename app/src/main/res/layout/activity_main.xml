@@ -23,7 +23,7 @@
             android:id="@+id/expandCardView"
             android:layout_width="80dp"
             android:layout_height="30dp"
-            android:visibility="gone"
+            android:visibility="invisible"
             app:cardBackgroundColor="@color/b1"
             app:cardCornerRadius="10dp"
             app:cardUseCompatPadding="true"
@@ -36,7 +36,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:visibility="visible"
             app:cardBackgroundColor="@color/b5"
             app:cardCornerRadius="5dp"
             app:cardElevation="10dp"
@@ -52,8 +51,8 @@
 
                 <Button
                     android:id="@+id/miniCardView"
-                    android:layout_width="60dp"
-                    android:layout_height="22dp"
+                    android:layout_width="70dp"
+                    android:layout_height="19dp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -106,6 +105,16 @@
                     app:layout_constraintTop_toBottomOf="@+id/finishClick" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
+
+        <Button
+            android:id="@+id/alert"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/ic_baseline_campaign_24"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mainCard" />
 
         <Button
             android:id="@+id/fab"
