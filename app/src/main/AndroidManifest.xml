@@ -20,7 +20,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
-        <activity android:name=".SendAlertActivity"></activity>
+        <activity android:name=".activty.SendAlertActivity"></activity>
         <activity android:name=".activty.ExpActivity" />
         <activity
             android:name=".activty.FindLocationActivity"

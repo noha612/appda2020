@@ -1,8 +1,10 @@
-package edu.ptit.vn.appda2020;
+package edu.ptit.vn.appda2020.activty;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import edu.ptit.vn.appda2020.R;
 
 public class SendAlertActivity extends AppCompatActivity {
 

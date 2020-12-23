@@ -19,7 +19,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
@@ -34,6 +33,8 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ import edu.ptit.vn.appda2020.model.dto.Location;
 import edu.ptit.vn.appda2020.model.dto.Place;
 import edu.ptit.vn.appda2020.retrofit.APIService;
 import edu.ptit.vn.appda2020.retrofit.ApiUtils;
-import edu.ptit.vn.appda2020.util.LocationFinder;
+import edu.ptit.vn.appda2020.util.CommonUtils;
 
 public class MainActivity extends AppCompatActivity {
     IMapController mapController;
@@ -56,13 +57,11 @@ public class MainActivity extends AppCompatActivity {
     CardView mainCard;
     Button findRouteBtn;
     Button miniCardView;
-    Button expandCardView;
+    CardView expandCardView;
     TextView startClick;
     TextView finishClick;
     Location from;
     Location to;
-    Thread thread;
-    Marker gps;
     Marker fromMarker;
     Marker toMarker;
     List<GeoPoint> route;
@@ -72,12 +71,13 @@ public class MainActivity extends AppCompatActivity {
     Polyline walkFrom;
     Polyline walkTo;
     Gson gson = new Gson();
-    ImageView fab;
+    Button fab;
     View main;
     String TAP_CODE = null;
 
     View mainTab;
     APIService mAPIService;
+    MyLocationNewOverlay gps;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,38 +122,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        gps = new Marker(mapView);
-        thread = new Thread() {
-
-            @Override
-            public void run() {
-                try {
-                    while (!thread.isInterrupted()) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LocationFinder finder;
-                                double longitude = 0.0, latitude = 0.0;
-                                finder = new LocationFinder(MainActivity.this, MainActivity.this);
-                                if (finder.canGetLocation()) {
-                                    latitude = finder.getLatitude();
-                                    longitude = finder.getLongitude();
-                                    GeoPoint geoPoint = new GeoPoint(latitude, longitude);
-                                    gps.setPosition(geoPoint);
-                                    gps.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                                    gps.setIcon(getResources().getDrawable(R.drawable.ic_baseline_person_pin_24));
-                                    mapView.getOverlays().add(gps);
-                                }
-                            }
-                        });
-                        Thread.sleep(2000);
-//                        mapView.getOverlays().remove(current);
-                    }
-                } catch (InterruptedException e) {
-                }
-            }
-        };
-
         fromMarker = new Marker(mapView);
         fromMarker.setTextIcon("From");
         toMarker = new Marker(mapView);
@@ -165,23 +133,13 @@ public class MainActivity extends AppCompatActivity {
         walkFrom = new Polyline();
         walkTo = new Polyline();
 
-        thread.start();
-
         fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LocationFinder finder;
-                double longitude = 0.0, latitude = 0.0;
-                finder = new LocationFinder(MainActivity.this, MainActivity.this);
-                if (finder.canGetLocation()) {
-                    latitude = finder.getLatitude();
-                    longitude = finder.getLongitude();
-                    GeoPoint geoPoint = new GeoPoint(latitude, longitude);
-//                    mapController.setCenter(geoPoint);
-                    mapController.animateTo(geoPoint);
-                    mapController.setZoom(17L);
-                }
+                mapController.animateTo(gps.getMyLocation());
+                mapController.setZoom(17L);
+                fab.animate().rotationBy(540).setDuration(500);
             }
         });
 
@@ -216,8 +174,11 @@ public class MainActivity extends AppCompatActivity {
                 mainCard.animate()
                         .translationY(-mainCard.getHeight())
                         .alpha(0.0f)
-                        .setDuration(300);
+                        .setDuration(200);
                 expandCardView.setVisibility(View.VISIBLE);
+                expandCardView.animate().rotationBy(-180)
+                        .alpha(1.0f)
+                        .setDuration(200);
             }
         });
         expandCardView.setOnClickListener(new View.OnClickListener() {
@@ -226,8 +187,11 @@ public class MainActivity extends AppCompatActivity {
                 mainCard.animate()
                         .translationY(0)
                         .alpha(1.0f)
-                        .setDuration(300);
-                expandCardView.setVisibility(View.GONE);
+                        .setDuration(200);
+                expandCardView.animate().rotationBy(180)
+                        .alpha(0.0f)
+                        .setDuration(200);
+                ;
             }
         });
     }
@@ -259,16 +223,8 @@ public class MainActivity extends AppCompatActivity {
         mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mapController = mapView.getController();
         mapController.setZoom(16L);
-        LocationFinder finder;
-        double longitude = 0.0, latitude = 0.0;
-        finder = new LocationFinder(MainActivity.this, MainActivity.this);
-        if (finder.canGetLocation()) {
-            latitude = finder.getLatitude();
-            longitude = finder.getLongitude();
-//            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
-            GeoPoint geoPoint = new GeoPoint(20.9935828, 105.8061848);
-            mapController.setCenter(geoPoint);
-        }
+//            PTIT
+//            GeoPoint geoPoint = new GeoPoint(20.9935828, 105.8061848);
 
         double minlat = 20.8710, minlon = 105.6002, maxlat = 21.1761, maxlon = 106.1393;
         List<GeoPoint> geoPoints = new ArrayList<>();
@@ -288,7 +244,11 @@ public class MainActivity extends AppCompatActivity {
         mapView.getOverlayManager().add(line);
 
         mapView.setMultiTouchControls(true);
-
+        gps = new MyLocationNewOverlay(new GpsMyLocationProvider(this), mapView);
+        gps.enableMyLocation();
+        gps.enableFollowLocation();
+        gps.setPersonIcon(CommonUtils.getBitmapFromVectorDrawable(this, R.drawable.ic_baseline_person_pin_24));
+        mapView.getOverlays().add(this.gps);
     }
 
 

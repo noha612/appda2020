@@ -19,21 +19,24 @@
         android:layout_gravity="top"
         android:layout_margin="5dp">
 
-        <Button
+        <androidx.cardview.widget.CardView
             android:id="@+id/expandCardView"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="80dp"
+            android:layout_height="30dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/b1"
+            app:cardCornerRadius="10dp"
+            app:cardUseCompatPadding="true"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:background="@drawable/ic_baseline_dehaze_24"
-            android:visibility="gone"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/mainCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
+            android:visibility="visible"
             app:cardBackgroundColor="@color/b5"
             app:cardCornerRadius="5dp"
             app:cardElevation="10dp"
@@ -49,18 +52,18 @@
 
                 <Button
                     android:id="@+id/miniCardView"
-                    android:layout_width="50dp"
-                    android:layout_height="15dp"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_width="60dp"
+                    android:layout_height="22dp"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/startClick"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="27dp"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="24dp"
                     android:layout_marginRight="20dp"
                     android:background="@drawable/textlines"
                     android:hint=" Từ"
@@ -104,12 +107,12 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
-        <ImageView
+        <Button
             android:id="@+id/fab"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_marginBottom="10dp"
-            android:src="@drawable/ic_baseline_gps_fixed_24"
+            android:background="@drawable/ic_baseline_gps_fixed_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
