@@ -12,145 +12,125 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 
-    <Button
-        android:id="@+id/alertBackToMain"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:background="@drawable/ic_baseline_close_24"
-        android:layout_gravity="center_horizontal" />
-
-    <LinearLayout
+    <View
+        android:id="@+id/alertMode"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mức độ tắc nghẽn hiện tại?"
-            android:textAlignment="center"
-            android:textColor="#000000"
-            android:textSize="24sp" />
+        android:layout_height="match_parent">
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="#CCFFEB3B"
-            android:text="THẤP" />
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="#CCFFC107"
-            android:text="TRUNG BÌNH" />
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="#CCFF5722"
-            android:text="NGHIÊM TRỌNG" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/mainTab"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:background="@drawable/layout_bg"
-        android:orientation="vertical"
-        android:visibility="gone">
+            android:id="@+id/alertBackToMain"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/ic_baseline_close_24" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
-            android:orientation="horizontal">
+            android:layout_gravity="bottom"
+            android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="47dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="25dp"
-                android:layout_weight="1"
-                app:srcCompat="@drawable/ic_baseline_more_vert_24"
-                tools:srcCompat="@drawable/ic_baseline_more_vert_24" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mức độ tắc nghẽn hiện tại?"
+                android:textAlignment="center"
+                android:textColor="#000000"
+                android:textSize="24sp" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#CCFFEB3B"
+                android:text="THẤP" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#CCFFC107"
+                android:text="TRUNG BÌNH" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#CCFF5722"
+                android:text="NGHIÊM TRỌNG" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/mainTab"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/layout_bg"
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="6"
-                android:orientation="vertical">
+                android:layout_marginBottom="15dp"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/startClick"
+                <ImageView
+                    android:layout_width="47dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="25dp"
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/ic_baseline_more_vert_24"
+                    tools:srcCompat="@drawable/ic_baseline_more_vert_24" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginRight="25dp"
-                    android:hint="Từ"
-                    android:textColor="#000000"
-                    android:textSize="20sp" />
+                    android:layout_weight="6"
+                    android:orientation="vertical">
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="20dp"
-                    android:background="#000000" />
+                    <TextView
+                        android:id="@+id/startClick"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginRight="25dp"
+                        android:hint="Từ"
+                        android:textColor="#000000"
+                        android:textSize="20sp" />
 
-                <TextView
-                    android:id="@+id/finishClick"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginRight="25dp"
-                    android:hint="Đến"
-                    android:textColor="#000000"
-                    android:textSize="20sp" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="20dp"
+                        android:background="#000000" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="20dp"
-                    android:background="#000000" />
+                    <TextView
+                        android:id="@+id/finishClick"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginRight="25dp"
+                        android:hint="Đến"
+                        android:textColor="#000000"
+                        android:textSize="20sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="20dp"
+                        android:background="#000000" />
+
+                </LinearLayout>
 
             </LinearLayout>
-
         </LinearLayout>
-
-
-        <Button
-            android:id="@+id/button"
-            style="?attr/imageButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp"
-            android:layout_marginBottom="12dp"
-
-            android:background="@drawable/layout_button"
-            android:text=" Tìm đường "
-            android:textStyle="normal" />
-    </LinearLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginRight="15dp"
-        android:layout_marginBottom="575dp"
-        android:src="@drawable/ic_baseline_explore_24"
-        android:visibility="gone"
-        tools:ignore="VectorDrawableCompat" />
+    </View>
 
 
 </FrameLayout>

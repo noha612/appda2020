@@ -14,118 +14,169 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/directionMode"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="top"
         android:layout_margin="5dp">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/expandCardView"
-            android:layout_width="80dp"
-            android:layout_height="30dp"
-            android:visibility="invisible"
-            app:cardBackgroundColor="@color/b1"
-            app:cardCornerRadius="10dp"
-            app:cardUseCompatPadding="true"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            <androidx.cardview.widget.CardView
+                android:id="@+id/expandCardView"
+                android:layout_width="80dp"
+                android:layout_height="30dp"
+                android:visibility="invisible"
+                app:cardBackgroundColor="@color/b1"
+                app:cardCornerRadius="10dp"
+                app:cardUseCompatPadding="true"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/mainCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            app:cardBackgroundColor="@color/b5"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="10dp"
-            app:cardUseCompatPadding="true"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/mainTab"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/mainCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:layout_margin="5dp">
+                android:layout_margin="5dp"
+                app:cardBackgroundColor="@color/b5"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="10dp"
+                app:cardUseCompatPadding="true"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <Button
-                    android:id="@+id/miniCardView"
-                    android:layout_width="70dp"
-                    android:layout_height="19dp"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/startClick"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/mainTab"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="27dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginRight="20dp"
-                    android:background="@drawable/textlines"
-                    android:hint=" Từ"
-                    android:textSize="19sp"
-                    app:layout_constraintTop_toTopOf="@+id/mainTab" />
+                    android:layout_gravity="top"
+                    android:layout_margin="5dp">
 
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="33dp"
-                    android:foreground="@drawable/ic_baseline_more_vert_24"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <Button
+                        android:id="@+id/miniCardView"
+                        android:layout_width="70dp"
+                        android:layout_height="19dp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/finishClick"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="27dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginRight="20dp"
-                    android:background="@drawable/textlines"
-                    android:hint=" Đến"
-                    android:textSize="19sp"
-                    app:layout_constraintTop_toBottomOf="@+id/startClick" />
+                    <TextView
+                        android:id="@+id/startClick"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="27dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginRight="20dp"
+                        android:background="@drawable/textlines"
+                        android:hint=" Từ"
+                        android:textSize="19sp"
+                        app:layout_constraintTop_toTopOf="@+id/mainTab" />
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="33dp"
+                        android:foreground="@drawable/ic_baseline_more_vert_24"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/finishClick"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="27dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="20dp"
+                        android:background="@drawable/textlines"
+                        android:hint=" Đến"
+                        android:textSize="19sp"
+                        app:layout_constraintTop_toBottomOf="@+id/startClick" />
 
 
-                <Button
-                    android:id="@+id/button"
-                    style="?attr/imageButtonStyle"
-                    android:layout_width="90dp"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/layout_button"
-                    android:elevation="@dimen/cardview_compat_inset_shadow"
-                    android:text="Tìm đường"
-                    android:textColor="@color/b5"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/finishClick" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+                    <Button
+                        android:id="@+id/button"
+                        style="?attr/imageButtonStyle"
+                        android:layout_width="90dp"
+                        android:layout_height="35dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/layout_button"
+                        android:elevation="@dimen/cardview_compat_inset_shadow"
+                        android:text="Tìm đường"
+                        android:textColor="@color/b5"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/finishClick" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
 
-        <Button
-            android:id="@+id/alert"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="10dp"
-            android:background="@drawable/ic_baseline_campaign_24"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/mainCard" />
+            <Button
+                android:id="@+id/alert"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/ic_baseline_campaign_24"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mainCard" />
 
-        <Button
-            android:id="@+id/fab"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/ic_baseline_gps_fixed_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            <Button
+                android:id="@+id/fab"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/ic_baseline_gps_fixed_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/alertMode"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/alertBackToMain"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/ic_baseline_close_24" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mức độ tắc nghẽn hiện tại?"
+                android:textAlignment="center"
+                android:textColor="#000000"
+                android:textSize="24sp" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#CCFFEB3B"
+                android:text="THẤP" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#CCFFC107"
+                android:text="TRUNG BÌNH" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#CCFF5722"
+                android:text="NGHIÊM TRỌNG" />
+        </LinearLayout>
+    </FrameLayout>
 
 
 </FrameLayout>
