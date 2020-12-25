@@ -84,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
     //alertMode
     FrameLayout alertMode;
     Button alertBackToMain;
+    Button btnLow;
+    Button btnMid;
+    Button btnHigh;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
         directionMode = findViewById(R.id.directionMode);
         alertMode = findViewById(R.id.alertMode);
         initMap();
-        onDirectionMode();
+        initDirectionMode();
+        initAlertMode();
     }
 
     @Override
@@ -133,8 +137,151 @@ public class MainActivity extends AppCompatActivity {
         gps.setPersonIcon(CommonUtils.getBitmapFromVectorDrawable(this, R.drawable.ic_baseline_person_pin_24));
         mapView.getOverlays().add(this.gps);
         mapController.animateTo(gps.getMyLocation());
+
+        MapEventsReceiver mReceive = new MapEventsReceiver() {
+            @Override
+            public boolean singleTapConfirmedHelper(GeoPoint p) {
+                if (TAP_CODE != null)
+                    tapToChooseLocation(p);
+
+                return false;
+            }
+
+            @Override
+            public boolean longPressHelper(GeoPoint p) {
+                return false;
+            }
+        };
+        MapEventsOverlay OverlayEvents = new MapEventsOverlay(getBaseContext(), mReceive);
+        mapView.getOverlays().add(OverlayEvents);
     }
 
+    private void initDirectionMode() {
+        //direction mode view
+        from = new Location();
+        to = new Location();
+        findRouteBtn = findViewById(R.id.button);
+        startClick = findViewById(R.id.startClick);
+        finishClick = findViewById(R.id.finishClick);
+        fromMarker = new Marker(mapView);
+        fromMarker.setTextIcon("From");
+        toMarker = new Marker(mapView);
+        toMarker.setTextIcon("To");
+        route = new ArrayList<>();
+        lstGPWalkFrom = new ArrayList<>();
+        lstGPWalkTo = new ArrayList<>();
+        line = new Polyline();
+        walkFrom = new Polyline();
+        walkTo = new Polyline();
+        mainCard = findViewById(R.id.mainCard);
+        miniCardView = findViewById(R.id.miniCardView);
+        expandCardView = findViewById(R.id.expandCardView);
+        expandCardView.setEnabled(false);
+        fab = findViewById(R.id.fab);
+        alert = findViewById(R.id.alert);
+
+
+        findRouteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (from != null && to != null) {
+                    getRoute(from.getPlace().getId(), to.getPlace().getId());
+                }
+            }
+        });
+
+        startClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, FindLocationActivity.class);
+                intent.putExtra("requestCode", 1);
+                startActivityForResult(intent, 1);
+            }
+        });
+
+        finishClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, FindLocationActivity.class);
+                intent.putExtra("requestCode", 2);
+                startActivityForResult(intent, 2);
+            }
+        });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mapController.animateTo(gps.getMyLocation());
+                mapController.setZoom(17L);
+                fab.animate().rotationBy(540).setDuration(500);
+            }
+        });
+        alert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                offDirectionMode();
+                onAlertMode();
+            }
+        });
+
+        miniCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainCard.animate()
+                        .translationYBy(-mainCard.getHeight())
+                        .alphaBy(-1.0f)
+                        .setDuration(200);
+                mainCard.setEnabled(!mainCard.isEnabled());
+
+                expandCardView.animate().rotationBy(-180)
+                        .alphaBy(1.0f)
+                        .setDuration(200);
+                expandCardView.setEnabled(!expandCardView.isEnabled());
+
+                alert.animate()
+                        .translationYBy(-mainCard.getHeight())
+                        .setDuration(200);
+            }
+        });
+
+        expandCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainCard.animate()
+                        .translationYBy(mainCard.getHeight())
+                        .alphaBy(1.0f)
+                        .setDuration(200);
+                mainCard.setEnabled(!mainCard.isEnabled());
+
+                expandCardView.animate().rotationBy(180)
+                        .alphaBy(-1.0f)
+                        .setDuration(200);
+                expandCardView.setEnabled(!expandCardView.isEnabled());
+
+                alert.animate()
+                        .translationYBy(mainCard.getHeight())
+                        .setDuration(200);
+            }
+        });
+
+    }
+
+    private void initAlertMode() {
+        //alert mode view
+        alertBackToMain = findViewById(R.id.alertBackToMain);
+        btnLow = findViewById(R.id.btnLow);
+        btnMid = findViewById(R.id.btnMid);
+        btnHigh = findViewById(R.id.btnHigh);
+
+        alertBackToMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                offAlertMode();
+                onDirectionMode();
+            }
+        });
+
+    }
 
     private void getRoute(String startId, String finishId) {
 
@@ -324,135 +471,63 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void onDirectionMode() {
-        directionMode.setVisibility(View.VISIBLE);
-        from = new Location();
-        to = new Location();
-        findRouteBtn = findViewById(R.id.button);
-        startClick = findViewById(R.id.startClick);
-        finishClick = findViewById(R.id.finishClick);
-        fromMarker = new Marker(mapView);
-        fromMarker.setTextIcon("From");
-        toMarker = new Marker(mapView);
-        toMarker.setTextIcon("To");
-        route = new ArrayList<>();
-        lstGPWalkFrom = new ArrayList<>();
-        lstGPWalkTo = new ArrayList<>();
-        line = new Polyline();
-        walkFrom = new Polyline();
-        walkTo = new Polyline();
-        mainCard = findViewById(R.id.mainCard);
-        miniCardView = findViewById(R.id.miniCardView);
-        expandCardView = findViewById(R.id.expandCardView);
-        fab = findViewById(R.id.fab);
-        alert = findViewById(R.id.alert);
+        mainCard.animate()
+                .translationYBy(mainCard.getHeight())
+                .alphaBy(1.0f)
+                .setDuration(200);
 
+        expandCardView.animate()
+                .translationYBy(expandCardView.getHeight())
+                .alphaBy(1.0f)
+                .setDuration(200);
 
-        findRouteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (from != null && to != null) {
-                    getRoute(from.getPlace().getId(), to.getPlace().getId());
-                }
-            }
-        });
+        alert.animate()
+                .translationYBy(mainCard.getHeight())
+                .alphaBy(1.0f)
+                .setDuration(200);
 
-        startClick.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, FindLocationActivity.class);
-                intent.putExtra("requestCode", 1);
-                startActivityForResult(intent, 1);
-            }
-        });
+        directionMode.setEnabled(true);
+    }
 
-        finishClick.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, FindLocationActivity.class);
-                intent.putExtra("requestCode", 2);
-                startActivityForResult(intent, 2);
-            }
-        });
+    void offDirectionMode() {
+        mainCard.animate()
+                .translationYBy(-mainCard.getHeight())
+                .alphaBy(-1.0f)
+                .setDuration(200);
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mapController.animateTo(gps.getMyLocation());
-                mapController.setZoom(17L);
-                fab.animate().rotationBy(540).setDuration(500);
-            }
-        });
+        expandCardView.animate()
+                .translationYBy(-expandCardView.getHeight())
+                .alphaBy(-1.0f)
+                .setDuration(200);
 
-        MapEventsReceiver mReceive = new MapEventsReceiver() {
-            @Override
-            public boolean singleTapConfirmedHelper(GeoPoint p) {
-                if (TAP_CODE != null)
-                    tapToChooseLocation(p);
+        alert.animate()
+                .translationYBy(-mainCard.getHeight())
+                .alphaBy(-1.0f)
+                .setDuration(200);
 
-                return false;
-            }
-
-            @Override
-            public boolean longPressHelper(GeoPoint p) {
-                return false;
-            }
-        };
-
-
-        MapEventsOverlay OverlayEvents = new MapEventsOverlay(getBaseContext(), mReceive);
-        mapView.getOverlays().add(OverlayEvents);
-        alert.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                directionMode.setVisibility(View.GONE);
-                onAlertMode();
-            }
-        });
-
-        miniCardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainCard.animate()
-                        .translationY(-mainCard.getHeight())
-                        .alpha(0.0f)
-                        .setDuration(200);
-                expandCardView.setVisibility(View.VISIBLE);
-                expandCardView.animate().rotationBy(-180)
-                        .alpha(1.0f)
-                        .setDuration(200);
-                alert.animate()
-                        .translationY(-mainCard.getHeight())
-                        .setDuration(200);
-            }
-        });
-
-        expandCardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainCard.animate()
-                        .translationY(0)
-                        .alpha(1.0f)
-                        .setDuration(200);
-                expandCardView.animate().rotationBy(180)
-                        .alpha(0.0f)
-                        .setDuration(200);
-                alert.animate()
-                        .translationY(0)
-                        .setDuration(200);
-            }
-        });
+        directionMode.setEnabled(false);
     }
 
     void onAlertMode() {
+        mapController.animateTo(gps.getMyLocation());
+        mapController.setZoom(18L);
         alertMode.setVisibility(View.VISIBLE);
-        alertBackToMain = findViewById(R.id.alertBackToMain);
-        alertBackToMain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alertMode.setVisibility(View.GONE);
-                onDirectionMode();
-            }
-        });
+        alertMode.setEnabled(true);
+        int h = btnLow.getHeight() + btnMid.getHeight() + btnHigh.getHeight();
+        btnLow.animate().translationYBy(btnLow.getHeight());
+        btnMid.animate().translationYBy(btnMid.getHeight());
+        btnHigh.animate().translationYBy(btnHigh.getHeight());
+        btnLow.animate().translationYBy(-btnLow.getHeight()).setDuration(200);
+        btnMid.animate().translationYBy(-btnMid.getHeight()).setDuration(200);
+        btnHigh.animate().translationYBy(-btnHigh.getHeight()).setDuration(200);
+    }
+
+    void offAlertMode() {
+        alertMode.setVisibility(View.GONE);
+        alertMode.setEnabled(false);
+//        btnLow.animate().translationYBy(-h).setDuration(200);
+//        btnMid.animate().translationYBy(-h).setDuration(200);
+//        btnHigh.animate().translationYBy(-h).setDuration(200);
     }
 
 }
