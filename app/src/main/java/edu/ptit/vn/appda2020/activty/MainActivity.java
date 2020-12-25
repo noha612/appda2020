@@ -12,8 +12,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,17 +20,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.tileprovider.tilesource.ITileSource;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
@@ -58,15 +51,11 @@ import edu.ptit.vn.appda2020.retrofit.ApiUtils;
 import edu.ptit.vn.appda2020.util.CommonUtils;
 
 public class MainActivity extends AppCompatActivity {
-    IMapController mapController;
+
+    //map
     MapView mapView;
-    CardView mainCard;
-    Button findRouteBtn;
-    Button miniCardView;
-    Button alert;
-    CardView expandCardView;
-    TextView startClick;
-    TextView finishClick;
+    IMapController mapController;
+    MyLocationNewOverlay gps;
     Location from;
     Location to;
     Marker fromMarker;
@@ -77,24 +66,30 @@ public class MainActivity extends AppCompatActivity {
     Polyline line;
     Polyline walkFrom;
     Polyline walkTo;
-    Gson gson = new Gson();
-    Button fab;
-    View main;
     String TAP_CODE = null;
-    View mainTab;
+    Gson gson = new Gson();
     APIService mAPIService;
-    MyLocationNewOverlay gps;
-    Button alertBackToMain;
 
+    //directionMode
     ConstraintLayout directionMode;
+    CardView mainCard;
+    Button findRouteBtn;
+    Button miniCardView;
+    Button alert;
+    CardView expandCardView;
+    TextView startClick;
+    TextView finishClick;
+    Button fab;
+
+    //alertMode
     FrameLayout alertMode;
+    Button alertBackToMain;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAPIService = ApiUtils.getAPIService(this);
         setContentView(R.layout.activity_main);
-        main = findViewById(R.id.main);
         directionMode = findViewById(R.id.directionMode);
         alertMode = findViewById(R.id.alertMode);
         initMap();
@@ -201,15 +196,15 @@ public class MainActivity extends AppCompatActivity {
 //                        for (int i = 1; i < route.size() - 2; i++) {
 //                            total += HaversineScorer.computeCost(direction.getRoute().get(i), direction.getRoute().get(i + 1));
 //                        }
-                            double roundOff = Math.round(total * 100.0) / 100.0;
-                            final Snackbar snackbar = Snackbar.make(main, roundOff + " km", BaseTransientBottomBar.LENGTH_INDEFINITE);
-                            snackbar.setAction("X", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    snackbar.dismiss();
-                                }
-                            });
-                            snackbar.show();
+//                            double roundOff = Math.round(total * 100.0) / 100.0;
+//                            final Snackbar snackbar = Snackbar.make(main, roundOff + " km", BaseTransientBottomBar.LENGTH_INDEFINITE);
+//                            snackbar.setAction("X", new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    snackbar.dismiss();
+//                                }
+//                            });
+//                            snackbar.show();
                         }
                     });
                 }
@@ -278,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
                 mapController.setZoom(18L);
             }
         } else if (resultCode == 1 || resultCode == 2) {
-            mainTab.setVisibility(View.GONE);
+            mainCard.setVisibility(View.GONE);
             if (resultCode == 1) TAP_CODE = "FROM";
             if (resultCode == 2) TAP_CODE = "TO";
         }
@@ -315,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
                             mapController.setZoom(18L);
                         }
                         TAP_CODE = null;
-                        mainTab.setVisibility(View.VISIBLE);
+                        mainCard.setVisibility(View.VISIBLE);
                     }
                 });
 
@@ -345,7 +340,6 @@ public class MainActivity extends AppCompatActivity {
         line = new Polyline();
         walkFrom = new Polyline();
         walkTo = new Polyline();
-        mainTab = findViewById(R.id.mainTab);
         mainCard = findViewById(R.id.mainCard);
         miniCardView = findViewById(R.id.miniCardView);
         expandCardView = findViewById(R.id.expandCardView);
@@ -449,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    void onAlertMode(){
+    void onAlertMode() {
         alertMode.setVisibility(View.VISIBLE);
         alertBackToMain = findViewById(R.id.alertBackToMain);
         alertBackToMain.setOnClickListener(new View.OnClickListener() {

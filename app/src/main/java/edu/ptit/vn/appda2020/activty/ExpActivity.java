@@ -1,9 +1,6 @@
 package edu.ptit.vn.appda2020.activty;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.os.Bundle;
@@ -11,7 +8,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 
-import com.google.gson.Gson;
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.osmdroid.api.IMapController;
@@ -23,8 +20,6 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,12 +28,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 
 import edu.ptit.vn.appda2020.R;
-import edu.ptit.vn.appda2020.model.dto.Direction;
-import edu.ptit.vn.appda2020.model.dto.Junction;
 
 public class ExpActivity extends AppCompatActivity {
     private static Map<String, Double[]> listR;
