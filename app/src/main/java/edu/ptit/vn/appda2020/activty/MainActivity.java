@@ -26,6 +26,7 @@ import com.google.gson.reflect.TypeToken;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
@@ -118,11 +119,11 @@ public class MainActivity extends AppCompatActivity {
 
         mapView = findViewById(R.id.map);
         mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.NEVER);
-//        mapView.setTileSource(new XYTileSource(
-//                "MySource",
-//                0, 18, 256, ".png",
-//                new String[]{"http://192.168.43.11:8081/styles/osm-bright/"}
-//        ));
+        mapView.setTileSource(new XYTileSource(
+                "MySource",
+                0, 18, 256, ".png",
+                new String[]{"http://192.168.0.107:8081/styles/osm-bright/"}
+        ));
         mapView.setTilesScaledToDpi(true);
         mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mapController = mapView.getController();
