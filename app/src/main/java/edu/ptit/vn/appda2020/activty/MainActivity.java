@@ -119,11 +119,11 @@ public class MainActivity extends AppCompatActivity {
 
         mapView = findViewById(R.id.map);
         mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.NEVER);
-        mapView.setTileSource(new XYTileSource(
-                "MySource",
-                0, 18, 256, ".png",
-                new String[]{"http://192.168.0.107:8081/styles/osm-bright/"}
-        ));
+//        mapView.setTileSource(new XYTileSource(
+//                "MySource",
+//                0, 18, 256, ".png",
+//                new String[]{"http://192.168.0.107:8081/styles/osm-bright/"}
+//        ));
         mapView.setTilesScaledToDpi(true);
         mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mapController = mapView.getController();
