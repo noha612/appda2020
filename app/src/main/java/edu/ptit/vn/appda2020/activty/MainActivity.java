@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     Button findRouteBtn;
     Button miniCardView;
     Button alert;
-    CardView expandCardView;
+    Button expandCardView;
     TextView startClick;
     TextView finishClick;
     Button fab;

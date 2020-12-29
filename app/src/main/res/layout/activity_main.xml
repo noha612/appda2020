@@ -19,13 +19,11 @@
         android:layout_gravity="top"
         android:layout_margin="5dp">
 
-            <androidx.cardview.widget.CardView
+            <Button
                 android:id="@+id/expandCardView"
                 android:layout_width="80dp"
-                android:layout_height="30dp"
-                app:cardBackgroundColor="@color/b1"
-                app:cardCornerRadius="10dp"
-                app:cardUseCompatPadding="true"
+                android:layout_height="20dp"
+                android:background="@drawable/layout_button_2"
                 android:alpha="0"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
@@ -34,9 +32,8 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/mainCard"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="175dp"
                 android:layout_margin="5dp"
-                app:cardBackgroundColor="@color/b5"
                 app:cardCornerRadius="5dp"
                 app:cardElevation="10dp"
                 app:cardUseCompatPadding="true"
@@ -44,14 +41,16 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="top"
-                    android:layout_margin="5dp">
+                    android:layout_margin="0dp"
+                    android:background="@drawable/grad_digital_water">
 
                     <Button
                         android:id="@+id/miniCardView"
+                        android:background="@color/b5"
                         android:layout_width="70dp"
-                        android:layout_height="19dp"
+                        android:layout_height="10dp"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -69,8 +68,8 @@
                         app:layout_constraintTop_toTopOf="@+id/miniCardView" />
 
                     <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="40dp"
+                        android:layout_width="37dp"
+                        android:layout_height="37dp"
                         android:layout_marginTop="33dp"
                         android:foreground="@drawable/ic_baseline_more_vert_24"
                         app:layout_constraintLeft_toLeftOf="parent"
