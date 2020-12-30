@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -31,7 +32,7 @@ public class Splash extends AppCompatActivity {
                 Log.v("error", e.toString());
             } finally {
                 Intent i = new Intent(Splash.this, MainActivity.class);
-                startActivity(i);
+                startActivityForResult(i, 99);
             }
         }
     };
@@ -43,21 +44,21 @@ public class Splash extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         Toast.makeText(this, getIMEIDeviceId(this), Toast.LENGTH_LONG).show();
 
-//        if (
-//                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                        == PackageManager.PERMISSION_GRANTED ||
-//                        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-//                                == PackageManager.PERMISSION_GRANTED) {
-//            startUp.start();
-//        } else {
-//            ActivityCompat.requestPermissions(
-//                    this,
-//                    new String[]{
-//                            Manifest.permission.ACCESS_FINE_LOCATION,
-//                            Manifest.permission.ACCESS_COARSE_LOCATION
-//                    },
-//                    101);
-//        }
+        if (
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED) {
+            startUp.start();
+        } else {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    101);
+        }
     }
 
     @Override
@@ -100,5 +101,11 @@ public class Splash extends AppCompatActivity {
         }
         Log.d("deviceId", deviceId);
         return deviceId;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        finish();
     }
 }
