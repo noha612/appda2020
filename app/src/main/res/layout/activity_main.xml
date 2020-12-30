@@ -139,42 +139,54 @@
             android:background="@drawable/ic_baseline_close_24" />
 
         <LinearLayout
+            android:id="@+id/alertStep1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="70dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/alertGuide"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hãy chọn đoạn đường tắc nghẽn"
+                android:textAlignment="center"
+                android:textColor="@color/b1"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/alertStep2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Mức độ tắc nghẽn hiện tại?"
-                android:textAlignment="center"
-                android:textColor="#000000"
-                android:textSize="24sp" />
-
             <Button
                 android:id="@+id/btnLow"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
                 android:layout_gravity="bottom"
                 android:background="#CCFFEB3B"
-                android:text="THẤP" />
+                android:text="THẤP\n 15km/h" />
 
             <Button
                 android:id="@+id/btnMid"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
                 android:layout_gravity="bottom"
                 android:background="#CCFFC107"
-                android:text="TRUNG BÌNH" />
+                android:text="TRUNG BÌNH\n 10km/h" />
 
             <Button
                 android:id="@+id/btnHigh"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
                 android:layout_gravity="bottom"
                 android:background="#CCFF5722"
-                android:text="NGHIÊM TRỌNG" />
+                android:text="NGHIÊM TRỌNG\n 5km/h" />
         </LinearLayout>
     </FrameLayout>
 

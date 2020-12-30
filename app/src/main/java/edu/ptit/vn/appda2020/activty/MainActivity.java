@@ -1,17 +1,25 @@
 package edu.ptit.vn.appda2020.activty;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +28,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -70,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
     String TAP_CODE = null;
     Gson gson = new Gson();
     APIService mAPIService;
+    Button fab;
+    int trigger = 0;
 
     //directionMode
     ConstraintLayout directionMode;
@@ -80,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
     Button expandCardView;
     TextView startClick;
     TextView finishClick;
-    Button fab;
 
     //alertMode
     FrameLayout alertMode;
@@ -88,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
     Button btnLow;
     Button btnMid;
     Button btnHigh;
+    LinearLayout alertStep1;
+    LinearLayout alertStep2;
+    TextView alertGuide;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,6 +110,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         directionMode = findViewById(R.id.directionMode);
         alertMode = findViewById(R.id.alertMode);
+        directionMode.setVisibility(View.VISIBLE);
+        alertMode.setVisibility(View.INVISIBLE);
+        alertMode.setEnabled(false);
         initMap();
         initDirectionMode();
         initAlertMode();
@@ -142,8 +159,9 @@ public class MainActivity extends AppCompatActivity {
         MapEventsReceiver mReceive = new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-                if (TAP_CODE != null)
+                if (TAP_CODE != null) {
                     tapToChooseLocation(p);
+                }
 
                 return false;
             }
@@ -185,7 +203,9 @@ public class MainActivity extends AppCompatActivity {
         findRouteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (from != null && to != null) {
+                fab.animate().translationY(-200);
+                trigger = 1;
+                if (from.getPlace() != null && to.getPlace() != null) {
                     getRoute(from.getPlace().getId(), to.getPlace().getId());
                 }
             }
@@ -273,12 +293,36 @@ public class MainActivity extends AppCompatActivity {
         btnLow = findViewById(R.id.btnLow);
         btnMid = findViewById(R.id.btnMid);
         btnHigh = findViewById(R.id.btnHigh);
+        alertStep1 = findViewById(R.id.alertStep1);
+        alertStep2 = findViewById(R.id.alertStep2);
+        alertGuide = findViewById(R.id.alertGuide);
 
         alertBackToMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 offAlertMode();
                 onDirectionMode();
+            }
+        });
+
+        btnLow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendAlert();
+            }
+        });
+
+        btnMid.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendAlert();
+            }
+        });
+
+        btnHigh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendAlert();
             }
         });
 
@@ -421,54 +465,110 @@ public class MainActivity extends AppCompatActivity {
                 mapController.setZoom(18L);
             }
         } else if (resultCode == 1 || resultCode == 2) {
-            mainCard.setVisibility(View.GONE);
+            mainCard.setVisibility(View.INVISIBLE);
+            mainCard.setEnabled(false);
             if (resultCode == 1) TAP_CODE = "FROM";
             if (resultCode == 2) TAP_CODE = "TO";
         }
     }
 
     private void tapToChooseLocation(final GeoPoint gp) {
+        if (TAP_CODE.equalsIgnoreCase("FROM") || TAP_CODE.equalsIgnoreCase("TO")) {
 
-        mAPIService.getLocations(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Location>() {
-            @Override
-            public void onResponse(retrofit2.Call<Location> call, final retrofit2.Response<Location> response) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (TAP_CODE.equals("FROM")) {
-                            from = response.body();
-                            startClick.setText(from.getPlace().getId());
-                            GeoPoint gp = new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng());
-                            fromMarker.setPosition(gp);
-                            fromMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                            fromMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_location_on_24));
-                            mapView.getOverlays().add(fromMarker);
-                            mapController.setCenter(gp);
-                            mapController.setZoom(18L);
+            mAPIService.getLocations(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Location>() {
+                @Override
+                public void onResponse(retrofit2.Call<Location> call, final retrofit2.Response<Location> response) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (TAP_CODE.equals("FROM")) {
+                                from = response.body();
+                                startClick.setText(from.getPlace().getId());
+                                GeoPoint gp = new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng());
+                                fromMarker.setPosition(gp);
+                                fromMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                                fromMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_location_on_24));
+                                mapView.getOverlays().add(fromMarker);
+                                mapController.setCenter(gp);
+                                mapController.setZoom(18L);
+                            }
+                            if (TAP_CODE.equals("TO")) {
+                                to = response.body();
+                                finishClick.setText(to.getPlace().getId());
+                                GeoPoint gp = new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng());
+                                toMarker.setPosition(gp);
+                                toMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                                toMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_where_to_vote_24));
+                                mapView.getOverlays().add(toMarker);
+                                mapController.setCenter(gp);
+                                mapController.setZoom(18L);
+                            }
+                            TAP_CODE = null;
+                            mainCard.setVisibility(View.VISIBLE);
                         }
-                        if (TAP_CODE.equals("TO")) {
-                            to = response.body();
-                            finishClick.setText(to.getPlace().getId());
-                            GeoPoint gp = new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng());
-                            toMarker.setPosition(gp);
-                            toMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                            toMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_where_to_vote_24));
-                            mapView.getOverlays().add(toMarker);
-                            mapController.setCenter(gp);
-                            mapController.setZoom(18L);
-                        }
-                        TAP_CODE = null;
-                        mainCard.setVisibility(View.VISIBLE);
+                    });
+
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<Location> call, Throwable t) {
+
+                }
+            });
+        } else if (TAP_CODE.equalsIgnoreCase("ALERT")) {
+            alertGuide.setText("Chọn mức độ tắc nghẽn");
+            YoYo.with(Techniques.Bounce).duration(1000).playOn(alertGuide);
+            YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnLow);
+            YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnHigh);
+            YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnMid);
+            Log.v("fab", fab.getY() + " ");
+            fab.animate().translationY(-450);
+            Log.v("fab", fab.getY() + " ");
+            alertStep2.setVisibility(View.VISIBLE);
+            alertStep2.setEnabled(true);
+        }
+    }
+
+    private String getIMEIDeviceId() {
+
+        String deviceId;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            deviceId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        } else {
+            final TelephonyManager mTelephony = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (this.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                    return "";
+                }
+            }
+            assert mTelephony != null;
+            if (mTelephony.getDeviceId() != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    deviceId = mTelephony.getImei();
+                } else {
+                    deviceId = mTelephony.getDeviceId();
+                }
+            } else {
+                deviceId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+            }
+        }
+        Log.d("deviceId", deviceId);
+        return deviceId;
+    }
+
+    private void sendAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Thank you! " + getIMEIDeviceId())
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        offAlertMode();
+                        onDirectionMode();
                     }
                 });
-
-            }
-
-            @Override
-            public void onFailure(retrofit2.Call<Location> call, Throwable t) {
-
-            }
-        });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     void onDirectionMode() {
@@ -488,6 +588,10 @@ public class MainActivity extends AppCompatActivity {
                 .setDuration(200);
 
         directionMode.setEnabled(true);
+        if (trigger == 0)
+            fab.animate().translationY(0);
+        else
+            fab.animate().translationY(-200);
     }
 
     void offDirectionMode() {
@@ -514,21 +618,20 @@ public class MainActivity extends AppCompatActivity {
         mapController.setZoom(18L);
         alertMode.setVisibility(View.VISIBLE);
         alertMode.setEnabled(true);
-        int h = btnLow.getHeight() + btnMid.getHeight() + btnHigh.getHeight();
-        btnLow.animate().translationYBy(btnLow.getHeight());
-        btnMid.animate().translationYBy(btnMid.getHeight());
-        btnHigh.animate().translationYBy(btnHigh.getHeight());
-        btnLow.animate().translationYBy(-btnLow.getHeight()).setDuration(200);
-        btnMid.animate().translationYBy(-btnMid.getHeight()).setDuration(200);
-        btnHigh.animate().translationYBy(-btnHigh.getHeight()).setDuration(200);
+        alertGuide.setText("Hãy chọn đoạn đường tắc nghẽn");
+        YoYo.with(Techniques.Bounce).duration(1500).playOn(alertGuide);
+        alertStep2.setVisibility(View.INVISIBLE);
+        alertStep2.setEnabled(false);
+        fab.setTranslationY(0);
+
+        TAP_CODE = "ALERT";
     }
 
     void offAlertMode() {
-        alertMode.setVisibility(View.GONE);
+        alertMode.setVisibility(View.INVISIBLE);
         alertMode.setEnabled(false);
-//        btnLow.animate().translationYBy(-h).setDuration(200);
-//        btnMid.animate().translationYBy(-h).setDuration(200);
-//        btnHigh.animate().translationYBy(-h).setDuration(200);
+
+        TAP_CODE = null;
     }
 
 }

@@ -42,7 +42,6 @@ public class Splash extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        Toast.makeText(this, getIMEIDeviceId(this), Toast.LENGTH_LONG).show();
 
         if (
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -73,34 +72,6 @@ public class Splash extends AppCompatActivity {
         } else {
             finish();
         }
-    }
-
-    public static String getIMEIDeviceId(Context context) {
-
-        String deviceId;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        } else {
-            final TelephonyManager mTelephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                    return "";
-                }
-            }
-            assert mTelephony != null;
-            if (mTelephony.getDeviceId() != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    deviceId = mTelephony.getImei();
-                } else {
-                    deviceId = mTelephony.getDeviceId();
-                }
-            } else {
-                deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-            }
-        }
-        Log.d("deviceId", deviceId);
-        return deviceId;
     }
 
     @Override
