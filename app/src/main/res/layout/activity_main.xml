@@ -20,10 +20,10 @@
         android:layout_margin="5dp">
 
         <Button
-            android:layout_marginTop="30dp"
             android:id="@+id/expandCardView"
             android:layout_width="80dp"
             android:layout_height="20dp"
+            android:layout_marginTop="30dp"
             android:alpha="0"
             android:background="@drawable/button_expand_cardview"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -31,10 +31,10 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.cardview.widget.CardView
-            android:layout_marginTop="30dp"
             android:id="@+id/mainCard"
             android:layout_width="match_parent"
             android:layout_height="175dp"
+            android:layout_marginTop="30dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="10dp"
             app:cardUseCompatPadding="true"
@@ -119,19 +119,59 @@
             android:id="@+id/fab"
             android:layout_width="52dp"
             android:layout_height="52dp"
-            android:layout_marginEnd="12dp"
             android:layout_marginTop="224dp"
+            android:layout_marginEnd="12dp"
             android:background="@drawable/ic_baseline_gps_fixed_24"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/subCard"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="10dp"
+            app:cardUseCompatPadding="true"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top"
+                android:layout_margin="0dp"
+                android:background="@drawable/grad_portrait">
+
+                <TextView
+                    android:id="@+id/routeInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="20 km (18 phút)."
+                    android:textSize="24sp"
+                    android:textColor="@color/b1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+                <Button
+                    android:id="@+id/closeSubCard"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/ic_baseline_close_24"
+                    />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
-        android:layout_marginTop="30dp"
         android:id="@+id/alertMode"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="30dp"
         android:visibility="gone">
 
         <Button
@@ -194,10 +234,10 @@
     </FrameLayout>
 
     <FrameLayout
-        android:layout_marginTop="30dp"
         android:id="@+id/pickMode"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="30dp">
 
         <LinearLayout
             android:layout_width="match_parent"
