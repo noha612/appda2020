@@ -1,6 +1,7 @@
 package edu.ptit.vn.appda2020.activty;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,6 +10,9 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,7 +22,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import edu.ptit.vn.appda2020.R;
+import edu.ptit.vn.appda2020.util.CommonUtils;
 
 public class Splash extends AppCompatActivity {
 
@@ -42,7 +50,8 @@ public class Splash extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-
+        CommonUtils.setTranslucentStatus(this, true);
+        CommonUtils.MIUISetStatusBarLightMode(this, true);
         if (
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED ||

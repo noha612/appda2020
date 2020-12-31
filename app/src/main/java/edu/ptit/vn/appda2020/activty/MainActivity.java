@@ -1,6 +1,7 @@
 package edu.ptit.vn.appda2020.activty;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,10 +17,11 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,16 +38,20 @@ import com.google.gson.reflect.TypeToken;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
+import org.osmdroid.views.overlay.compass.CompassOverlay;
+import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -67,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     MapView mapView;
     IMapController mapController;
     MyLocationNewOverlay gps;
+    RotationGestureOverlay rotation;
+    CompassOverlay compass;
     Location from;
     Location to;
     Marker fromMarker;
@@ -103,30 +111,34 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout alertStep2;
     TextView alertGuide;
 
+    //pickMode
+    FrameLayout pickMode;
+    TextView pickGuide;
+    Button exitPickMode;
+    Button pick;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAPIService = ApiUtils.getAPIService(this);
         setContentView(R.layout.activity_main);
+        CommonUtils.setTranslucentStatus(this, true);
+        CommonUtils.MIUISetStatusBarLightMode(this, true);
+
         directionMode = findViewById(R.id.directionMode);
         alertMode = findViewById(R.id.alertMode);
+        pickMode = findViewById(R.id.pickMode);
+
         directionMode.setVisibility(View.VISIBLE);
         alertMode.setVisibility(View.INVISIBLE);
         alertMode.setEnabled(false);
+        pickMode.setVisibility(View.INVISIBLE);
+        pickMode.setEnabled(false);
+
         initMap();
         initDirectionMode();
         initAlertMode();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == 1) {
-            if (!(grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                    && grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
-                Toast.makeText(this, "Permission denied to access your location.", Toast.LENGTH_SHORT).show();
-            }
-        }
+        initPickMode();
     }
 
     private void initMap() {
@@ -155,6 +167,16 @@ public class MainActivity extends AppCompatActivity {
         gps.setPersonIcon(CommonUtils.getBitmapFromVectorDrawable(this, R.drawable.ic_baseline_person_pin_24));
         mapView.getOverlays().add(this.gps);
         mapController.animateTo(gps.getMyLocation());
+
+        rotation = new RotationGestureOverlay(mapView);
+        rotation.setEnabled(true);
+        mapView.setMultiTouchControls(true);
+        mapView.getOverlays().add(this.rotation);
+
+        compass = new CompassOverlay(this, new InternalCompassOrientationProvider(this), mapView);
+        compass.enableCompass();
+        mapView.getOverlays().add(compass);
+        compass.setCompassCenter(350,450);
 
         MapEventsReceiver mReceive = new MapEventsReceiver() {
             @Override
@@ -328,6 +350,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void initPickMode() {
+        //pick mode view
+        pickGuide = findViewById(R.id.pickGuide);
+        exitPickMode = findViewById(R.id.exitPickMode);
+        pick = findViewById(R.id.pick);
+
+        exitPickMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                offPickMode();
+                String tempTapCode = TAP_CODE;
+                onDirectionMode();
+                Intent intent = new Intent(MainActivity.this, FindLocationActivity.class);
+                if (tempTapCode.equalsIgnoreCase("FROM")) {
+                    intent.putExtra("requestCode", 1);
+                    startActivityForResult(intent, 1);
+                } else if (tempTapCode.equalsIgnoreCase("TO")) {
+                    intent.putExtra("requestCode", 2);
+                    startActivityForResult(intent, 2);
+                }
+            }
+        });
+
+        pick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tapToChooseLocation((GeoPoint) mapView.getMapCenter());
+                offPickMode();
+                onDirectionMode();
+            }
+        });
+    }
+
     private void getRoute(String startId, String finishId) {
 
         mAPIService.getDirections(startId, finishId).enqueue(new retrofit2.Callback<Direction>() {
@@ -465,65 +520,64 @@ public class MainActivity extends AppCompatActivity {
                 mapController.setZoom(18L);
             }
         } else if (resultCode == 1 || resultCode == 2) {
-            mainCard.setVisibility(View.INVISIBLE);
-            mainCard.setEnabled(false);
-            if (resultCode == 1) TAP_CODE = "FROM";
-            if (resultCode == 2) TAP_CODE = "TO";
+            offDirectionMode();
+            onPickMode(resultCode);
+        } else if (resultCode == 11 || resultCode == 22) {
+            TAP_CODE = requestCode == 11 ? "FROM" : "TO";
+            tapToChooseLocation(gps.getMyLocation());
         }
     }
 
     private void tapToChooseLocation(final GeoPoint gp) {
-        if (TAP_CODE.equalsIgnoreCase("FROM") || TAP_CODE.equalsIgnoreCase("TO")) {
-
-            mAPIService.getLocations(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Location>() {
-                @Override
-                public void onResponse(retrofit2.Call<Location> call, final retrofit2.Response<Location> response) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (TAP_CODE.equals("FROM")) {
-                                from = response.body();
-                                startClick.setText(from.getPlace().getId());
-                                GeoPoint gp = new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng());
-                                fromMarker.setPosition(gp);
-                                fromMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                                fromMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_location_on_24));
-                                mapView.getOverlays().add(fromMarker);
-                                mapController.setCenter(gp);
-                                mapController.setZoom(18L);
-                            }
-                            if (TAP_CODE.equals("TO")) {
-                                to = response.body();
-                                finishClick.setText(to.getPlace().getId());
-                                GeoPoint gp = new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng());
-                                toMarker.setPosition(gp);
-                                toMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                                toMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_where_to_vote_24));
-                                mapView.getOverlays().add(toMarker);
-                                mapController.setCenter(gp);
-                                mapController.setZoom(18L);
-                            }
-                            TAP_CODE = null;
-                            mainCard.setVisibility(View.VISIBLE);
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onFailure(retrofit2.Call<Location> call, Throwable t) {
-
-                }
-            });
-        } else if (TAP_CODE.equalsIgnoreCase("ALERT")) {
+        Toast.makeText(this, gp.toDoubleString() + TAP_CODE, Toast.LENGTH_SHORT).show();
+        if ("FROM".equalsIgnoreCase(TAP_CODE) || "TO".equalsIgnoreCase(TAP_CODE)) {
+//            mAPIService.getLocations(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Location>() {
+//                @Override
+//                public void onResponse(retrofit2.Call<Location> call, final retrofit2.Response<Location> response) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            if (TAP_CODE.equals("FROM")) {
+//                                from = response.body();
+//                                startClick.setText(from.getPlace().getId());
+//                                GeoPoint gp = new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng());
+//                                fromMarker.setPosition(gp);
+//                                fromMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+//                                fromMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_location_on_24));
+//                                mapView.getOverlays().add(fromMarker);
+//                                mapController.setCenter(gp);
+//                                mapController.setZoom(18L);
+//                            }
+//                            if (TAP_CODE.equals("TO")) {
+//                                to = response.body();
+//                                finishClick.setText(to.getPlace().getId());
+//                                GeoPoint gp = new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng());
+//                                toMarker.setPosition(gp);
+//                                toMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+//                                toMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_where_to_vote_24));
+//                                mapView.getOverlays().add(toMarker);
+//                                mapController.setCenter(gp);
+//                                mapController.setZoom(18L);
+//                            }
+//                            TAP_CODE = null;
+//                            mainCard.setVisibility(View.VISIBLE);
+//                        }
+//                    });
+//
+//                }
+//
+//                @Override
+//                public void onFailure(retrofit2.Call<Location> call, Throwable t) {
+//
+//                }
+//            });
+        } else if ("ALERT".equalsIgnoreCase(TAP_CODE)) {
             alertGuide.setText("Chọn mức độ tắc nghẽn");
             YoYo.with(Techniques.Bounce).duration(1000).playOn(alertGuide);
             YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnLow);
             YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnHigh);
             YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnMid);
-            Log.v("fab", fab.getY() + " ");
-            fab.animate().translationY(-450);
-            Log.v("fab", fab.getY() + " ");
+            fab.animate().translationY(-460);
             alertStep2.setVisibility(View.VISIBLE);
             alertStep2.setEnabled(true);
         }
@@ -592,6 +646,8 @@ public class MainActivity extends AppCompatActivity {
             fab.animate().translationY(0);
         else
             fab.animate().translationY(-200);
+
+        TAP_CODE = null;
     }
 
     void offDirectionMode() {
@@ -618,7 +674,7 @@ public class MainActivity extends AppCompatActivity {
         mapController.setZoom(18L);
         alertMode.setVisibility(View.VISIBLE);
         alertMode.setEnabled(true);
-        alertGuide.setText("Hãy chọn đoạn đường tắc nghẽn");
+        alertGuide.setText("Hãy chọn đoạn đường tắc");
         YoYo.with(Techniques.Bounce).duration(1500).playOn(alertGuide);
         alertStep2.setVisibility(View.INVISIBLE);
         alertStep2.setEnabled(false);
@@ -631,7 +687,33 @@ public class MainActivity extends AppCompatActivity {
         alertMode.setVisibility(View.INVISIBLE);
         alertMode.setEnabled(false);
 
-        TAP_CODE = null;
     }
 
+    void onPickMode(int resultCode) {
+        pickMode.setVisibility(View.VISIBLE);
+        pickMode.setEnabled(true);
+        YoYo.with(Techniques.Bounce).duration(1500).playOn(pickGuide);
+        if (resultCode == 1) TAP_CODE = "FROM";
+        if (resultCode == 2) TAP_CODE = "TO";
+    }
+
+    void offPickMode() {
+        pickMode.setVisibility(View.INVISIBLE);
+        pickMode.setEnabled(false);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (directionMode.isEnabled()) {
+            super.onBackPressed();
+        }
+        if (alertMode.isEnabled()) {
+            offAlertMode();
+            onDirectionMode();
+        }
+        if (pickMode.isEnabled()) {
+            offPickMode();
+            onDirectionMode();
+        }
+    }
 }

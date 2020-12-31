@@ -18,12 +18,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -37,12 +41,14 @@ import edu.ptit.vn.appda2020.adapter.AutoSuggestAdapter;
 import edu.ptit.vn.appda2020.model.dto.Place;
 import edu.ptit.vn.appda2020.retrofit.APIService;
 import edu.ptit.vn.appda2020.retrofit.ApiUtils;
+import edu.ptit.vn.appda2020.util.CommonUtils;
 
 public class FindLocationActivity extends AppCompatActivity {
     private static final int TRIGGER_AUTO_COMPLETE = 100;
     private static final long AUTO_COMPLETE_DELAY = 300;
     AutoCompleteTextView input;
-    TextView tap;
+    CardView tap;
+    CardView gps;
     Button btnBack;
     Place[] places;
     String[] stringList;
@@ -59,6 +65,8 @@ public class FindLocationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_location);
+        CommonUtils.setTranslucentStatus(this, true);
+        CommonUtils.MIUISetStatusBarLightMode(this, true);
 
         initHistory();
         mAPIService = ApiUtils.getAPIService(this);
@@ -138,7 +146,18 @@ public class FindLocationActivity extends AppCompatActivity {
         tap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(getIntent().getIntExtra("requestCode", 0), null);
+                int resultCode = getIntent().getIntExtra("requestCode", 0) == 1 ? 1 : 2;
+                setResult(resultCode);
+                finish();
+            }
+        });
+
+        gps = findViewById(R.id.gps);
+        gps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int resultCode = getIntent().getIntExtra("requestCode", 0) == 1 ? 11 : 22;
+                setResult(resultCode);
                 finish();
             }
         });

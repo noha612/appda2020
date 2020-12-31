@@ -10,6 +10,7 @@
     tools:context=".activty.FindLocationActivity">
 
     <androidx.cardview.widget.CardView
+        android:layout_marginTop="30dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -51,6 +52,7 @@
                 app:layout_constraintTop_toBottomOf="@id/searchCard">
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/gps"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -69,7 +71,6 @@
                             android:background="@drawable/ic_baseline_emoji_people_24" />
 
                         <TextView
-                            android:id="@+id/gps"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Vị trí hiện tại"
@@ -79,6 +80,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/tap"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -97,7 +99,6 @@
                             android:background="@drawable/ic_baseline_follow_the_signs_24" />
 
                         <TextView
-                            android:id="@+id/tap"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
