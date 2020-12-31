@@ -1,7 +1,6 @@
 package edu.ptit.vn.appda2020.activty;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,8 +16,6 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -50,8 +47,6 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -142,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMap() {
+//            PTIT
+//            GeoPoint geoPoint = new GeoPoint(20.9935828, 105.8061848);
 
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
@@ -156,17 +153,14 @@ public class MainActivity extends AppCompatActivity {
         mapView.setTilesScaledToDpi(true);
         mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mapController = mapView.getController();
-        mapController.setZoom(16L);
-//            PTIT
-//            GeoPoint geoPoint = new GeoPoint(20.9935828, 105.8061848);
-
-        mapView.setMultiTouchControls(true);
         gps = new MyLocationNewOverlay(new GpsMyLocationProvider(this), mapView);
         gps.enableMyLocation();
         gps.enableFollowLocation();
         gps.setPersonIcon(CommonUtils.getBitmapFromVectorDrawable(this, R.drawable.ic_baseline_person_pin_24));
         mapView.getOverlays().add(this.gps);
         mapController.animateTo(gps.getMyLocation());
+        mapController.setZoom(16L);
+        mapView.setMultiTouchControls(true);
 
         rotation = new RotationGestureOverlay(mapView);
         rotation.setEnabled(true);
@@ -176,13 +170,13 @@ public class MainActivity extends AppCompatActivity {
         compass = new CompassOverlay(this, new InternalCompassOrientationProvider(this), mapView);
         compass.enableCompass();
         mapView.getOverlays().add(compass);
-        compass.setCompassCenter(350,450);
+        compass.setCompassCenter(350, 480);
 
         MapEventsReceiver mReceive = new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
                 if (TAP_CODE != null) {
-                    tapToChooseLocation(p);
+                    onTap(p);
                 }
 
                 return false;
@@ -225,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
         findRouteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fab.animate().translationY(-200);
                 trigger = 1;
                 if (from.getPlace() != null && to.getPlace() != null) {
                     getRoute(from.getPlace().getId(), to.getPlace().getId());
@@ -276,9 +269,7 @@ public class MainActivity extends AppCompatActivity {
                         .setDuration(200);
                 mainCard.setEnabled(!mainCard.isEnabled());
 
-                expandCardView.animate().rotationBy(-180)
-                        .alphaBy(1.0f)
-                        .setDuration(200);
+                YoYo.with(Techniques.ZoomIn).duration(200).playOn(expandCardView);
                 expandCardView.setEnabled(!expandCardView.isEnabled());
 
                 alert.animate()
@@ -296,9 +287,7 @@ public class MainActivity extends AppCompatActivity {
                         .setDuration(200);
                 mainCard.setEnabled(!mainCard.isEnabled());
 
-                expandCardView.animate().rotationBy(180)
-                        .alphaBy(-1.0f)
-                        .setDuration(200);
+                YoYo.with(Techniques.ZoomOut).duration(200).playOn(expandCardView);
                 expandCardView.setEnabled(!expandCardView.isEnabled());
 
                 alert.animate()
@@ -376,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
         pick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tapToChooseLocation((GeoPoint) mapView.getMapCenter());
+                onTap((GeoPoint) mapView.getMapCenter());
                 offPickMode();
                 onDirectionMode();
             }
@@ -524,11 +513,11 @@ public class MainActivity extends AppCompatActivity {
             onPickMode(resultCode);
         } else if (resultCode == 11 || resultCode == 22) {
             TAP_CODE = requestCode == 11 ? "FROM" : "TO";
-            tapToChooseLocation(gps.getMyLocation());
+            onTap(gps.getMyLocation());
         }
     }
 
-    private void tapToChooseLocation(final GeoPoint gp) {
+    private void onTap(final GeoPoint gp) {
         Toast.makeText(this, gp.toDoubleString() + TAP_CODE, Toast.LENGTH_SHORT).show();
         if ("FROM".equalsIgnoreCase(TAP_CODE) || "TO".equalsIgnoreCase(TAP_CODE)) {
 //            mAPIService.getLocations(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Location>() {
@@ -572,12 +561,13 @@ public class MainActivity extends AppCompatActivity {
 //                }
 //            });
         } else if ("ALERT".equalsIgnoreCase(TAP_CODE)) {
+            mapController.animateTo(gp);
+            mapController.setZoom(18L);
             alertGuide.setText("Chọn mức độ tắc nghẽn");
             YoYo.with(Techniques.Bounce).duration(1000).playOn(alertGuide);
             YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnLow);
             YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnHigh);
             YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnMid);
-            fab.animate().translationY(-460);
             alertStep2.setVisibility(View.VISIBLE);
             alertStep2.setEnabled(true);
         }
@@ -642,10 +632,6 @@ public class MainActivity extends AppCompatActivity {
                 .setDuration(200);
 
         directionMode.setEnabled(true);
-        if (trigger == 0)
-            fab.animate().translationY(0);
-        else
-            fab.animate().translationY(-200);
 
         TAP_CODE = null;
     }
@@ -678,7 +664,6 @@ public class MainActivity extends AppCompatActivity {
         YoYo.with(Techniques.Bounce).duration(1500).playOn(alertGuide);
         alertStep2.setVisibility(View.INVISIBLE);
         alertStep2.setEnabled(false);
-        fab.setTranslationY(0);
 
         TAP_CODE = "ALERT";
     }

@@ -25,7 +25,7 @@
             android:layout_width="80dp"
             android:layout_height="20dp"
             android:alpha="0"
-            android:background="@drawable/layout_button_2"
+            android:background="@drawable/button_expand_cardview"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -35,7 +35,7 @@
             android:id="@+id/mainCard"
             android:layout_width="match_parent"
             android:layout_height="175dp"
-            app:cardCornerRadius="5dp"
+            app:cardCornerRadius="10dp"
             app:cardElevation="10dp"
             app:cardUseCompatPadding="true"
             app:layout_constraintTop_toTopOf="parent">
@@ -45,13 +45,13 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="top"
                 android:layout_margin="0dp"
-                android:background="@drawable/grad_digital_water">
+                android:background="@drawable/grad_portrait">
 
                 <Button
                     android:id="@+id/miniCardView"
                     android:layout_width="70dp"
                     android:layout_height="10dp"
-                    android:background="@color/b5"
+                    android:background="#D0D4D5"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -107,22 +107,23 @@
 
         <Button
             android:id="@+id/alert"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             android:layout_marginTop="5dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="12dp"
             android:background="@drawable/ic_baseline_campaign_24"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/mainCard" />
 
         <Button
             android:id="@+id/fab"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:layout_marginBottom="10dp"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="224dp"
             android:background="@drawable/ic_baseline_gps_fixed_24"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
