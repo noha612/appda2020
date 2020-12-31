@@ -9,7 +9,7 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="201dp"
-        android:layout_height="286dp"
+        android:layout_height="260dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
@@ -17,4 +17,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.538"
         app:srcCompat="@drawable/splash" />
+    <TextView
+        android:id="@+id/splashAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        android:text="Tìm Đường"
+        android:textColor="@color/b1"
+        android:textSize="32sp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

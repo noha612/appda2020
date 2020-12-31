@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -29,13 +33,14 @@ import edu.ptit.vn.appda2020.R;
 import edu.ptit.vn.appda2020.util.CommonUtils;
 
 public class Splash extends AppCompatActivity {
+    TextView splashAppName;
 
     Thread startUp = new Thread() {
         @Override
         public void run() {
             try {
                 super.run();
-                sleep(1000);
+                sleep(2000);
             } catch (Exception e) {
                 Log.v("error", e.toString());
             } finally {
@@ -50,6 +55,9 @@ public class Splash extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        splashAppName = findViewById(R.id.splashAppName);
+        YoYo.with(Techniques.FadeInUp).duration(2000).playOn(splashAppName);
+
         CommonUtils.setTranslucentStatus(this, true);
         CommonUtils.MIUISetStatusBarLightMode(this, true);
         if (
