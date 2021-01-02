@@ -206,6 +206,7 @@ public class FindLocationActivity extends AppCompatActivity {
     }
 
     public void getId(final boolean isSearchIconClick) {
+        Log.i("api", "call /da2020/v1/places : " + input.getText().toString());
         mAPIService.getPlaces(input.getText().toString()).enqueue(new retrofit2.Callback<Place[]>() {
             @Override
             public void onResponse(retrofit2.Call<Place[]> call, retrofit2.Response<Place[]> response) {
