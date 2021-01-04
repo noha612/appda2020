@@ -12,6 +12,7 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -21,7 +22,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +33,7 @@ import com.daimajia.androidanimations.library.YoYo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.apache.commons.lang3.StringUtils;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
@@ -55,13 +56,18 @@ import java.util.List;
 import java.util.Set;
 
 import edu.ptit.vn.appda2020.R;
+import edu.ptit.vn.appda2020.model.dto.AlertDTO;
 import edu.ptit.vn.appda2020.model.dto.Direction;
 import edu.ptit.vn.appda2020.model.dto.Junction;
 import edu.ptit.vn.appda2020.model.dto.Location;
 import edu.ptit.vn.appda2020.model.dto.Place;
+import edu.ptit.vn.appda2020.model.dto.Road;
 import edu.ptit.vn.appda2020.retrofit.APIService;
 import edu.ptit.vn.appda2020.retrofit.ApiUtils;
 import edu.ptit.vn.appda2020.util.CommonUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
     int trigger = 0;
     double l;
     double di;
+    int m;
 
     //directionMode
     ConstraintLayout directionMode;
@@ -101,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
     CardView subCard;
     Button closeSubCard;
     TextView routeInfo;
+    Button track;
+    boolean isTracking = false;
 
     //alertMode
     FrameLayout alertMode;
@@ -111,6 +120,9 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout alertStep1;
     LinearLayout alertStep2;
     TextView alertGuide;
+    Road congestRoad;
+    List<GeoPoint> lstCongest;
+    Polyline lineCongest;
 
     //pickMode
     FrameLayout pickMode;
@@ -121,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         mAPIService = ApiUtils.getAPIService(this);
         setContentView(R.layout.activity_main);
         CommonUtils.setTranslucentStatus(this, true);
@@ -176,7 +190,8 @@ public class MainActivity extends AppCompatActivity {
         compass = new CompassOverlay(this, new InternalCompassOrientationProvider(this), mapView);
         compass.enableCompass();
         mapView.getOverlays().add(compass);
-        compass.setCompassCenter(350, 480);
+        compass.setCompassCenter(350, 420);
+//        compass.setCompassCenter(350, 480);
 
         MapEventsReceiver mReceive = new MapEventsReceiver() {
             @Override
@@ -225,43 +240,15 @@ public class MainActivity extends AppCompatActivity {
         subCard.setEnabled(false);
         closeSubCard = findViewById(R.id.closeSubCard);
         routeInfo = findViewById(R.id.routeInfo);
+        track = findViewById(R.id.track);
 
         findRouteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 trigger = 1;
-//                if (from.getPlace() != null && to.getPlace() != null) {
-//                    getRoute(from.getPlace().getId(), to.getPlace().getId());
-//                }
-                //TODO remove mock data
-                String json = "{ \"from\": { \"lat\": 20.9796429, \"lng\": 105.7894867 }, \"to\": { \"lat\": 20.9793484, \"lng\": 105.8013902 }, \"junctions\": [ { \"lat\": 20.9796429, \"lng\": 105.7894867, \"id\": \"4025216936\" }, { \"lat\": 20.9793246, \"lng\": 105.7898131, \"id\": \"7432990799\" }, { \"lat\": 20.9791618, \"lng\": 105.7899445, \"id\": \"7432990796\" }, { \"lat\": 20.9793271, \"lng\": 105.7901886, \"id\": \"7432990809\" }, { \"lat\": 20.9793046, \"lng\": 105.7902154, \"id\": \"7432990810\" }, { \"lat\": 20.9793046, \"lng\": 105.7902744, \"id\": \"7432990811\" }, { \"lat\": 20.979376, \"lng\": 105.7903911, \"id\": \"6661249715\" }, { \"lat\": 20.9794123, \"lng\": 105.7904943, \"id\": \"6661249716\" }, { \"lat\": 20.9794035, \"lng\": 105.790595, \"id\": \"6661249717\" }, { \"lat\": 20.9793334, \"lng\": 105.7906298, \"id\": \"6661249718\" }, { \"lat\": 20.9792946, \"lng\": 105.7906419, \"id\": \"6661249719\" }, { \"lat\": 20.9792545, \"lng\": 105.7906473, \"id\": \"6661249720\" }, { \"lat\": 20.9791581, \"lng\": 105.790654, \"id\": \"6661249721\" }, { \"lat\": 20.9791209, \"lng\": 105.790705, \"id\": \"445225539\" }, { \"lat\": 20.9779253, \"lng\": 105.7916483, \"id\": \"2471646381\" }, { \"lat\": 20.9774678, \"lng\": 105.7920148, \"id\": \"445225405\" }, { \"lat\": 20.9770379, \"lng\": 105.7923586, \"id\": \"2471646387\" }, { \"lat\": 20.9770123, \"lng\": 105.7924367, \"id\": \"5710669307\" }, { \"lat\": 20.9770371, \"lng\": 105.7925159, \"id\": \"2471646386\" }, { \"lat\": 20.9773297, \"lng\": 105.7929894, \"id\": \"2471646385\" }, { \"lat\": 20.9775153, \"lng\": 105.7940481, \"id\": \"2570970397\" }, { \"lat\": 20.977526, \"lng\": 105.7941065, \"id\": \"5710669303\" }, { \"lat\": 20.9777233, \"lng\": 105.795186, \"id\": \"5710675055\" }, { \"lat\": 20.9773425, \"lng\": 105.7956075, \"id\": \"5710675050\" }, { \"lat\": 20.9771983, \"lng\": 105.7957671, \"id\": \"5710675049\" }, { \"lat\": 20.9775127, \"lng\": 105.7962046, \"id\": \"2291268386\" }, { \"lat\": 20.977566, \"lng\": 105.7962967, \"id\": \"2291268388\" }, { \"lat\": 20.9778934, \"lng\": 105.7967264, \"id\": \"2291268383\" }, { \"lat\": 20.9780455, \"lng\": 105.7969327, \"id\": \"2763229333\" }, { \"lat\": 20.9781697, \"lng\": 105.7970949, \"id\": \"5710675044\" }, { \"lat\": 20.9783504, \"lng\": 105.796941, \"id\": \"6666577664\" }, { \"lat\": 20.9784754, \"lng\": 105.7968345, \"id\": \"6652117939\" }, { \"lat\": 20.9785458, \"lng\": 105.7967746, \"id\": \"1897849719\" }, { \"lat\": 20.9785947, \"lng\": 105.7970615, \"id\": \"6415966270\" }, { \"lat\": 20.9786693, \"lng\": 105.7974993, \"id\": \"6415966271\" }, { \"lat\": 20.9786988, \"lng\": 105.7976723, \"id\": \"6652111325\" }, { \"lat\": 20.9787252, \"lng\": 105.7978267, \"id\": \"6651975136\" }, { \"lat\": 20.9787724, \"lng\": 105.7981035, \"id\": \"6415966261\" }, { \"lat\": 20.9788394, \"lng\": 105.7984969, \"id\": \"6666577666\" }, { \"lat\": 20.9789016, \"lng\": 105.7988616, \"id\": \"5716411035\" }, { \"lat\": 20.9789251, \"lng\": 105.7989638, \"id\": \"4867710521\" }, { \"lat\": 20.9790126, \"lng\": 105.7994592, \"id\": \"1897849717\" }, { \"lat\": 20.9792619, \"lng\": 105.8008928, \"id\": \"5716410790\" }, { \"lat\": 20.9793484, \"lng\": 105.8013902, \"id\": \"1897849721\" } ], \"traffics\": { \"4025216936_7432990799\": 1, \"7432990799_7432990796\": 1, \"7432990796_7432990809\": 1, \"7432990809_7432990810\": 1, \"7432990810_7432990811\": 1, \"7432990811_6661249715\": 1, \"6661249715_6661249716\": 1, \"6661249716_6661249717\": 1, \"6661249717_6661249718\": 1, \"6661249718_6661249719\": 1, \"6661249719_6661249720\": 1, \"6661249720_6661249721\": 1, \"6661249721_445225539\": 1, \"445225539_2471646381\": 1, \"2471646381_445225405\": 1, \"445225405_2471646387\": 1, \"2471646387_5710669307\": 1, \"5710669307_2471646386\": 1, \"2471646386_2471646385\": 1, \"2471646385_2570970397\": 1, \"2570970397_5710669303\": 1, \"5710669303_5710675055\": 1, \"5710675055_5710675050\": 1, \"5710675050_5710675049\": 1, \"5710675049_2291268386\": 1, \"2291268386_2291268388\": 1, \"2291268388_2291268383\": 1, \"2291268383_2763229333\": 1, \"2763229333_5710675044\": 1, \"5710675044_6666577664\": 1, \"6666577664_6652117939\": 1, \"6652117939_1897849719\": 1, \"1897849719_6415966270\": 1, \"6415966270_6415966271\": 1, \"6415966271_6652111325\": 1, \"6652111325_6651975136\": 1, \"6651975136_6415966261\": 1, \"6415966261_6666577666\": 1, \"6666577666_5716411035\": 1, \"5716411035_4867710521\": 1, \"4867710521_1897849717\": 1, \"1897849717_5716410790\": 1, \"5716410790_1897849721\": 1 } }";
-                Direction d = new Gson().fromJson(json, Direction.class);
-
-                route = new ArrayList<>();
-                for (Junction i : d.getJunctions()) {
-                    route.add(new GeoPoint(i.getLat(), i.getLng()));
+                if (from.getPlace() != null && to.getPlace() != null) {
+                    getRoute(from.getPlace().getId(), to.getPlace().getId());
                 }
-                line.getOutlinePaint().setStrokeJoin(Paint.Join.ROUND);
-                line.getOutlinePaint().setStrokeCap(Paint.Cap.ROUND);
-                line.getOutlinePaint().setColor(Color.parseColor("#29323c"));
-                line.setPoints(route);
-                line.getOutlinePaint().setStrokeWidth(14F);
-                di = CommonUtils.haversineFomular(
-                        new edu.ptit.vn.appda2020.model.dto.GeoPoint(20.9796429, 105.7894867),
-                        new edu.ptit.vn.appda2020.model.dto.GeoPoint(20.9793484, 105.8013902)
-                );
-
-                mapView.getOverlayManager().add(line);
-                mapController.animateTo(route.get(route.size() / 2));
-                mapController.setZoom(15.37 * 1.236 / di);
-
-                l = line.getDistance() / 1000;
-                l = Math.round(l * 100.0) / 100.0;
-                routeInfo.setText(l + " km (18 phút).");
-
-                YoYo.with(Techniques.SlideInUp).duration(250).playOn(subCard);
-                subCard.setVisibility(View.VISIBLE);
-                subCard.setEnabled(true);
             }
         });
 
@@ -342,6 +329,22 @@ public class MainActivity extends AppCompatActivity {
                 hideSubCardAndRoute();
             }
         });
+
+        track.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isTracking) {
+                    track.setText("Bắt đầu");
+                    gps.disableFollowLocation();
+                    isTracking = false;
+                } else {
+                    track.setText("Tạm dừng");
+                    mapController.setZoom(17.5);
+                    gps.enableFollowLocation();
+                    isTracking = true;
+                }
+            }
+        });
     }
 
     private void initAlertMode() {
@@ -354,6 +357,9 @@ public class MainActivity extends AppCompatActivity {
         alertStep2 = findViewById(R.id.alertStep2);
         alertGuide = findViewById(R.id.alertGuide);
 
+        lstCongest = new ArrayList<>();
+        lineCongest = new Polyline();
+
         alertBackToMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -365,21 +371,21 @@ public class MainActivity extends AppCompatActivity {
         btnLow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAlert();
+                sendAlert(2);
             }
         });
 
         btnMid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAlert();
+                sendAlert(3);
             }
         });
 
         btnHigh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAlert();
+                sendAlert(4);
             }
         });
 
@@ -446,18 +452,22 @@ public class MainActivity extends AppCompatActivity {
                             walkFrom.getOutlinePaint().setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
 
                             //route line
+                            if (CommonUtils.isStraight(direction.getJunctions().get(0), new edu.ptit.vn.appda2020.model.dto.GeoPoint(from.getH().getLat(), from.getH().getLng()), direction.getJunctions().get(1)))
+                                direction.getJunctions().remove(0);
+                            int n = direction.getJunctions().size();
+                            if (CommonUtils.isStraight(direction.getJunctions().get(n - 1), new edu.ptit.vn.appda2020.model.dto.GeoPoint(to.getH().getLat(), to.getH().getLng()), direction.getJunctions().get(n - 2)))
+                                direction.getJunctions().remove(n - 1);
                             route.add(new GeoPoint(from.getH().getLat(), from.getH().getLng()));
                             for (Junction i : direction.getJunctions()) {
                                 route.add(new GeoPoint(i.getLat(), i.getLng()));
                             }
                             route.add(new GeoPoint(to.getH().getLat(), to.getH().getLng()));
 
-                            //checking...
-
-
-                            line.getOutlinePaint().setColor(Color.BLACK);
+                            line.getOutlinePaint().setColor(Color.parseColor("#E6203A43"));
                             line.setPoints(route);
-                            line.getOutlinePaint().setStrokeWidth(6F);
+                            line.getOutlinePaint().setStrokeWidth(29F);
+                            line.getOutlinePaint().setStrokeJoin(Paint.Join.ROUND);
+                            line.getOutlinePaint().setStrokeCap(Paint.Cap.ROUND);
 
                             //dashed 2
                             lstGPWalkTo.add(new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng()));
@@ -471,22 +481,16 @@ public class MainActivity extends AppCompatActivity {
                             mapView.getOverlayManager().add(walkTo);
 
                             mapController.setCenter(route.get(route.size() / 2));
-                            mapController.setZoom(16L);
+                            mapController.zoomTo(13);
 
-                            //show distance
-                            double total = 0;
-//                        for (int i = 1; i < route.size() - 2; i++) {
-//                            total += HaversineScorer.computeCost(direction.getRoute().get(i), direction.getRoute().get(i + 1));
-//                        }
-//                            double roundOff = Math.round(total * 100.0) / 100.0;
-//                            final Snackbar snackbar = Snackbar.make(main, roundOff + " km", BaseTransientBottomBar.LENGTH_INDEFINITE);
-//                            snackbar.setAction("X", new View.OnClickListener() {
-//                                @Override
-//                                public void onClick(View v) {
-//                                    snackbar.dismiss();
-//                                }
-//                            });
-//                            snackbar.show();
+                            l = line.getDistance() / 1000;
+                            l = Math.round(l * 10.0) / 10.0;
+                            m = (int) Math.ceil(l * 3);
+                            routeInfo.setText(l + " km (" + m + " phút).");
+
+                            YoYo.with(Techniques.SlideInUp).duration(250).playOn(subCard);
+                            subCard.setVisibility(View.VISIBLE);
+                            subCard.setEnabled(true);
                         }
                     });
                 }
@@ -529,14 +533,15 @@ public class MainActivity extends AppCompatActivity {
                 from.setPlace(place);
                 from.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
                 from.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
-                startClick.setText(place.getName());
+                String displayName = place.getName().length() < 26 ? place.getName() : place.getName().substring(0, 26) + "...";
+                startClick.setText(displayName);
                 GeoPoint gp = new GeoPoint(place.getLat(), place.getLng());
                 fromMarker.setTitle(place.getName());
                 fromMarker.setPosition(gp);
                 fromMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                 fromMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_location_on_24));
                 mapView.getOverlays().add(fromMarker);
-                mapController.setCenter(gp);
+                mapController.animateTo(gp);
                 mapController.setZoom(18L);
             }
             if (requestCode == 2) {
@@ -544,78 +549,120 @@ public class MainActivity extends AppCompatActivity {
                 to.setPlace(place);
                 to.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
                 to.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
-                finishClick.setText(place.getName());
+                String displayName = place.getName().length() < 26 ? place.getName() : place.getName().substring(0, 26) + "...";
+                finishClick.setText(displayName);
                 GeoPoint gp = new GeoPoint(place.getLat(), place.getLng());
                 toMarker.setTitle(place.getName());
                 toMarker.setPosition(gp);
                 toMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                 toMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_where_to_vote_24));
                 mapView.getOverlays().add(toMarker);
-                mapController.setCenter(gp);
+                mapController.animateTo(gp);
                 mapController.setZoom(18L);
             }
         } else if (resultCode == 1 || resultCode == 2) {
             offDirectionMode();
             onPickMode(resultCode);
         } else if (resultCode == 11 || resultCode == 22) {
-            TAP_CODE = requestCode == 11 ? "FROM" : "TO";
+            TAP_CODE = resultCode == 11 ? "FROM" : "TO";
             onTap(gps.getMyLocation());
         }
     }
 
     private void onTap(final GeoPoint gp) {
-        Toast.makeText(this, gp.toDoubleString() + " " + TAP_CODE + " " + mapView.getZoomLevelDouble(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, gp.toDoubleString() + " " + TAP_CODE + " " + mapView.getZoomLevelDouble(), Toast.LENGTH_SHORT).show();
         if ("FROM".equalsIgnoreCase(TAP_CODE) || "TO".equalsIgnoreCase(TAP_CODE)) {
-//            mAPIService.getLocations(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Location>() {
-//                @Override
-//                public void onResponse(retrofit2.Call<Location> call, final retrofit2.Response<Location> response) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            if (TAP_CODE.equals("FROM")) {
-//                                from = response.body();
-//                                startClick.setText(from.getPlace().getId());
-//                                GeoPoint gp = new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng());
-//                                fromMarker.setPosition(gp);
-//                                fromMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-//                                fromMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_location_on_24));
-//                                mapView.getOverlays().add(fromMarker);
-//                                mapController.setCenter(gp);
-//                                mapController.setZoom(18L);
-//                            }
-//                            if (TAP_CODE.equals("TO")) {
-//                                to = response.body();
-//                                finishClick.setText(to.getPlace().getId());
-//                                GeoPoint gp = new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng());
-//                                toMarker.setPosition(gp);
-//                                toMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-//                                toMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_where_to_vote_24));
-//                                mapView.getOverlays().add(toMarker);
-//                                mapController.setCenter(gp);
-//                                mapController.setZoom(18L);
-//                            }
-//                            TAP_CODE = null;
-//                            mainCard.setVisibility(View.VISIBLE);
-//                        }
-//                    });
-//
-//                }
-//
-//                @Override
-//                public void onFailure(retrofit2.Call<Location> call, Throwable t) {
-//
-//                }
-//            });
+            mAPIService.getLocations(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Location>() {
+                @Override
+                public void onResponse(retrofit2.Call<Location> call, final retrofit2.Response<Location> response) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (TAP_CODE.equals("FROM")) {
+                                from = response.body();
+                                Place place = from.getPlace();
+                                String displayName = place.getName().length() < 26 ? place.getName() : place.getName().substring(0, 26) + "...";
+                                startClick.setText(displayName);
+                                fromMarker.setTitle(place.getName());
+                                GeoPoint gp = new GeoPoint(from.getMarker().getLat(), from.getMarker().getLng());
+                                fromMarker.setPosition(gp);
+                                fromMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                                fromMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_location_on_24));
+                                mapView.getOverlays().add(fromMarker);
+                                mapController.animateTo(gp);
+                                mapController.setZoom(18L);
+                            }
+                            if (TAP_CODE.equals("TO")) {
+                                to = response.body();
+                                Place place = to.getPlace();
+                                String displayName = place.getName().length() < 26 ? place.getName() : place.getName().substring(0, 26) + "...";
+                                finishClick.setText(displayName);
+                                toMarker.setTitle(place.getName());
+                                GeoPoint gp = new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng());
+                                toMarker.setPosition(gp);
+                                toMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                                toMarker.setIcon(getResources().getDrawable(R.drawable.ic_baseline_where_to_vote_24));
+                                mapView.getOverlays().add(toMarker);
+                                mapController.animateTo(gp);
+                                mapController.setZoom(18L);
+                            }
+                            trigger = 0;
+                            TAP_CODE = null;
+                            mainCard.setVisibility(View.VISIBLE);
+                        }
+                    });
+
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<Location> call, Throwable t) {
+
+                }
+            });
         } else if ("ALERT".equalsIgnoreCase(TAP_CODE)) {
-            mapController.animateTo(gp);
-            mapController.setZoom(18L);
-            alertGuide.setText("Chọn mức độ tắc nghẽn");
-            YoYo.with(Techniques.Bounce).duration(1000).playOn(alertGuide);
-            YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnLow);
-            YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnHigh);
-            YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnMid);
-            alertStep2.setVisibility(View.VISIBLE);
-            alertStep2.setEnabled(true);
+
+            mAPIService.getRoad(gp.getLatitude() + "", gp.getLongitude() + "").enqueue(new retrofit2.Callback<Road>() {
+                @Override
+                public void onResponse(retrofit2.Call<Road> call, final retrofit2.Response<Road> response) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (response.body() != null && response.body().getId() != null) {
+                                congestRoad = response.body();
+                                lstCongest.clear();
+                                mapView.getOverlays().remove(lineCongest);
+
+                                lstCongest.add(new GeoPoint(congestRoad.getGp1().getLat(), congestRoad.getGp1().getLng()));
+                                lstCongest.add(new GeoPoint(congestRoad.getGp2().getLat(), congestRoad.getGp2().getLng()));
+
+                                lineCongest.getOutlinePaint().setColor(Color.parseColor("#CCFF0000"));
+                                lineCongest.setPoints(lstCongest);
+                                lineCongest.getOutlinePaint().setStrokeWidth(29F);
+                                lineCongest.getOutlinePaint().setStrokeCap(Paint.Cap.ROUND);
+                                mapView.getOverlayManager().add(lineCongest);
+
+                                mapController.animateTo(gp);
+                                mapController.setZoom(18L);
+                                alertGuide.setText("Chọn mức độ tắc nghẽn");
+                                YoYo.with(Techniques.Bounce).duration(1000).playOn(alertGuide);
+                                YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnLow);
+                                YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnHigh);
+                                YoYo.with(Techniques.SlideInUp).duration(500).playOn(btnMid);
+                                alertStep2.setVisibility(View.VISIBLE);
+                                alertStep2.setEnabled(true);
+                            } else {
+                                YoYo.with(Techniques.Bounce).duration(1500).playOn(alertGuide);
+                            }
+                        }
+                    });
+
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<Road> call, Throwable t) {
+
+                }
+            });
         }
     }
 
@@ -647,9 +694,22 @@ public class MainActivity extends AppCompatActivity {
         return deviceId;
     }
 
-    private void sendAlert() {
+    private void sendAlert(int level) {
+        String mobileId = getIMEIDeviceId();
+        if (StringUtils.isEmpty(mobileId)) mobileId = "emulator0175";
+        mAPIService.send(new AlertDTO(mobileId, congestRoad.getId(), level)).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+
+            }
+        });
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Thank you! " + getIMEIDeviceId())
+        builder.setMessage("Cảm ơn đóng góp của bạn!")
                 .setCancelable(false)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -662,13 +722,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void hideSubCardAndRoute() {
+        track.setText("Bắt đầu");
+        gps.disableFollowLocation();
+        isTracking = false;
+        mapView.getOverlayManager().remove(walkFrom);
         mapView.getOverlayManager().remove(line);
+        mapView.getOverlayManager().remove(walkTo);
         YoYo.with(Techniques.SlideOutDown).duration(250).playOn(subCard);
         subCard.setEnabled(false);
     }
 
     private void showSubCardAndRoute() {
+        mapView.getOverlayManager().add(walkFrom);
         mapView.getOverlayManager().add(line);
+        mapView.getOverlayManager().add(walkTo);
         YoYo.with(Techniques.SlideInUp).duration(250).playOn(subCard);
         subCard.setEnabled(true);
         mapController.animateTo(route.get(route.size() / 2));
@@ -693,7 +760,6 @@ public class MainActivity extends AppCompatActivity {
 
         directionMode.setEnabled(true);
 
-        TAP_CODE = null;
         if (trigger == 1) {
             showSubCardAndRoute();
         }
@@ -735,6 +801,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void offAlertMode() {
+        TAP_CODE = null;
+        mapView.getOverlays().remove(lineCongest);
         alertMode.setVisibility(View.INVISIBLE);
         alertMode.setEnabled(false);
 

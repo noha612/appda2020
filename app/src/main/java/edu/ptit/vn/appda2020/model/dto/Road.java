@@ -5,11 +5,14 @@ import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
-public class GeoPoint implements Serializable {
-    private Double lat;
-    private Double lng;
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class Road implements Serializable {
+    String id;
+    GeoPoint gp1;
+    GeoPoint gp2;
 }

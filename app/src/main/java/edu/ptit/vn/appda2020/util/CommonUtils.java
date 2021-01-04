@@ -58,8 +58,10 @@ public class CommonUtils {
             win.setAttributes(winParams);
         }
     }
+
     /**
      * Need MIUIV6 or above
+     *
      * @param dark Set the status bar text and icon color to dark
      * @return boolean Successful execution returns true
      */
@@ -92,5 +94,9 @@ public class CommonUtils {
             }
         }
         return result;
+    }
+
+    public static boolean isStraight(GeoPoint A, GeoPoint B, GeoPoint C) {
+        return Math.abs(haversineFomular(A, B) + haversineFomular(B, C) - haversineFomular(A, C)) < 0.01;
     }
 }

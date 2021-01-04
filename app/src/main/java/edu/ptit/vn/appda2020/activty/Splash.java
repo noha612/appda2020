@@ -40,7 +40,7 @@ public class Splash extends AppCompatActivity {
         public void run() {
             try {
                 super.run();
-                sleep(2000);
+                sleep(2500);
             } catch (Exception e) {
                 Log.v("error", e.toString());
             } finally {
@@ -56,7 +56,7 @@ public class Splash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         splashAppName = findViewById(R.id.splashAppName);
-        YoYo.with(Techniques.FadeInUp).duration(2000).playOn(splashAppName);
+        splashAppName.setVisibility(View.INVISIBLE);
 
         CommonUtils.setTranslucentStatus(this, true);
         CommonUtils.MIUISetStatusBarLightMode(this, true);
@@ -65,6 +65,8 @@ public class Splash extends AppCompatActivity {
                         == PackageManager.PERMISSION_GRANTED ||
                         ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                                 == PackageManager.PERMISSION_GRANTED) {
+            splashAppName.setVisibility(View.VISIBLE);
+            YoYo.with(Techniques.SlideInDown).duration(2500).playOn(splashAppName);
             startUp.start();
         } else {
             ActivityCompat.requestPermissions(
@@ -82,6 +84,8 @@ public class Splash extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 101) {
             if (grantResults.length > 0 && grantResults[0] == 0) {
+                splashAppName.setVisibility(View.VISIBLE);
+                YoYo.with(Techniques.FadeInUp).duration(2000).playOn(splashAppName);
                 startUp.start();
             } else {
                 finish();
