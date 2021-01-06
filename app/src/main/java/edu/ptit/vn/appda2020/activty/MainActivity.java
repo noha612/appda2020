@@ -81,10 +81,9 @@ public class MainActivity extends AppCompatActivity {
     Location to;
     Marker fromMarker;
     Marker toMarker;
-    List<GeoPoint> route;
     List<GeoPoint> lstGPWalkFrom;
     List<GeoPoint> lstGPWalkTo;
-    Polyline line;
+    List<Polyline> lines;
     Polyline walkFrom;
     Polyline walkTo;
     String TAP_CODE = null;
@@ -223,10 +222,9 @@ public class MainActivity extends AppCompatActivity {
         fromMarker.setTextIcon("From");
         toMarker = new Marker(mapView);
         toMarker.setTextIcon("To");
-        route = new ArrayList<>();
         lstGPWalkFrom = new ArrayList<>();
         lstGPWalkTo = new ArrayList<>();
-        line = new Polyline();
+        lines = new ArrayList<>();
         walkFrom = new Polyline();
         walkTo = new Polyline();
         mainCard = findViewById(R.id.mainCard);
@@ -425,6 +423,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getRoute(String startId, String finishId) {
+        hideSubCardAndRoute();
 
         mAPIService.getDirections(startId, finishId).enqueue(new retrofit2.Callback<Direction>() {
             @Override
@@ -439,10 +438,10 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             mapView.getOverlays().remove(walkFrom);
-                            mapView.getOverlays().remove(line);
+                            removeLines();
+                            lines.clear();
                             mapView.getOverlays().remove(walkTo);
                             lstGPWalkFrom.clear();
-                            route.clear();
                             lstGPWalkTo.clear();
 
                             //dashed 1
@@ -457,17 +456,36 @@ public class MainActivity extends AppCompatActivity {
                             int n = direction.getJunctions().size();
                             if (CommonUtils.isStraight(direction.getJunctions().get(n - 1), new edu.ptit.vn.appda2020.model.dto.GeoPoint(to.getH().getLat(), to.getH().getLng()), direction.getJunctions().get(n - 2)))
                                 direction.getJunctions().remove(n - 1);
-                            route.add(new GeoPoint(from.getH().getLat(), from.getH().getLng()));
-                            for (Junction i : direction.getJunctions()) {
-                                route.add(new GeoPoint(i.getLat(), i.getLng()));
-                            }
-                            route.add(new GeoPoint(to.getH().getLat(), to.getH().getLng()));
 
-                            line.getOutlinePaint().setColor(Color.parseColor("#E6203A43"));
-                            line.setPoints(route);
-                            line.getOutlinePaint().setStrokeWidth(29F);
-                            line.getOutlinePaint().setStrokeJoin(Paint.Join.ROUND);
-                            line.getOutlinePaint().setStrokeCap(Paint.Cap.ROUND);
+                            for (int i = 0; i < direction.getJunctions().size() - 1; i++) {
+                                Junction j1 = direction.getJunctions().get(i);
+                                Junction j2 = direction.getJunctions().get(i + 1);
+                                List<GeoPoint> temp = new ArrayList<>();
+                                if (i == 0)
+                                    temp.add(new GeoPoint(from.getH().getLat(), from.getH().getLng()));
+                                temp.add(new GeoPoint(j1.getLat(), j1.getLng()));
+                                temp.add(new GeoPoint(j2.getLat(), j2.getLng()));
+                                if (i + 1 == direction.getJunctions().size() - 1)
+                                    temp.add(new GeoPoint(to.getH().getLat(), to.getH().getLng()));
+                                Polyline p = new Polyline();
+                                p.setPoints(temp);
+                                p.getOutlinePaint().setColor(Color.parseColor("#E6203A43"));
+                                p.getOutlinePaint().setStrokeWidth(29F);
+                                if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) != null) {
+                                    if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) == 1) {
+                                        p.getOutlinePaint().setColor(Color.parseColor("#FFEB3B"));
+                                    } else if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) == 2) {
+                                        p.getOutlinePaint().setColor(Color.parseColor("#FFC107"));
+                                    } else if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) == 3) {
+                                        p.getOutlinePaint().setColor(Color.parseColor("#FF5722"));
+                                    }
+                                }
+                                else{
+                                    p.getOutlinePaint().setStrokeJoin(Paint.Join.ROUND);
+                                    p.getOutlinePaint().setStrokeCap(Paint.Cap.ROUND);
+                                }
+                                lines.add(p);
+                            }
 
                             //dashed 2
                             lstGPWalkTo.add(new GeoPoint(to.getMarker().getLat(), to.getMarker().getLng()));
@@ -477,15 +495,15 @@ public class MainActivity extends AppCompatActivity {
 
                             //draw
                             mapView.getOverlayManager().add(walkFrom);
-                            mapView.getOverlayManager().add(line);
+                            addLines();
                             mapView.getOverlayManager().add(walkTo);
-
-                            mapController.setCenter(route.get(route.size() / 2));
+                            Junction center = direction.getJunctions().get(direction.getJunctions().size() / 2);
+                            mapController.setCenter(new GeoPoint(center.getLat(), center.getLng()));
                             mapController.zoomTo(13);
 
-                            l = line.getDistance() / 1000;
+                            l = direction.getLength();
                             l = Math.round(l * 10.0) / 10.0;
-                            m = (int) Math.ceil(l * 3);
+                            m = (int) Math.ceil(direction.getTime() * 60);
                             routeInfo.setText(l + " km (" + m + " phút).");
 
                             YoYo.with(Techniques.SlideInUp).duration(250).playOn(subCard);
@@ -529,7 +547,7 @@ public class MainActivity extends AppCompatActivity {
 //            if (listHis.size() > 10) listHis.remove(0);
             sharedPreferences.edit().putString("his", gson.toJson(listHis)).apply();
             if (requestCode == 1) {
-                mapView.getOverlays().remove(line);
+                removeLines();
                 from.setPlace(place);
                 from.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
                 from.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
@@ -545,7 +563,7 @@ public class MainActivity extends AppCompatActivity {
                 mapController.setZoom(18L);
             }
             if (requestCode == 2) {
-                mapView.getOverlays().remove(line);
+                removeLines();
                 to.setPlace(place);
                 to.setMarker(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
                 to.setH(new edu.ptit.vn.appda2020.model.dto.GeoPoint(place.getLat(), place.getLng()));
@@ -726,7 +744,7 @@ public class MainActivity extends AppCompatActivity {
         gps.disableFollowLocation();
         isTracking = false;
         mapView.getOverlayManager().remove(walkFrom);
-        mapView.getOverlayManager().remove(line);
+        removeLines();
         mapView.getOverlayManager().remove(walkTo);
         YoYo.with(Techniques.SlideOutDown).duration(250).playOn(subCard);
         subCard.setEnabled(false);
@@ -734,12 +752,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void showSubCardAndRoute() {
         mapView.getOverlayManager().add(walkFrom);
-        mapView.getOverlayManager().add(line);
+        addLines();
         mapView.getOverlayManager().add(walkTo);
         YoYo.with(Techniques.SlideInUp).duration(250).playOn(subCard);
         subCard.setEnabled(true);
-        mapController.animateTo(route.get(route.size() / 2));
-        mapController.setZoom(15.37 * 1.236 / di);
+        mapController.animateTo(lines.get(lines.size() / 2).getPoints().get(0));
+        mapController.setZoom(13);
     }
 
     void onDirectionMode() {
@@ -836,6 +854,18 @@ public class MainActivity extends AppCompatActivity {
         if (pickMode.isEnabled()) {
             offPickMode();
             onDirectionMode();
+        }
+    }
+
+    private void addLines() {
+        for (Polyline p : lines) {
+            mapView.getOverlayManager().add(p);
+        }
+    }
+
+    private void removeLines() {
+        for (Polyline p : lines) {
+            mapView.getOverlayManager().remove(p);
         }
     }
 }
