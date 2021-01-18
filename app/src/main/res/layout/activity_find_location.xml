@@ -4,15 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background2"
+    android:background="@drawable/picture1"
     android:orientation="vertical"
     android:textDirection="firstStrongRtl"
     tools:context=".activty.FindLocationActivity">
 
     <androidx.cardview.widget.CardView
-        android:layout_marginTop="30dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -35,7 +35,7 @@
 
                 <AutoCompleteTextView
                     android:id="@+id/input"
-                    android:layout_width="match_parent"
+                    android:layout_width="317dp"
                     android:layout_height="60dp"
                     android:layout_marginLeft="40dp"
                     android:layout_marginRight="20dp"
@@ -44,6 +44,14 @@
                     android:imeOptions="actionSearch"
                     android:inputType="text"
                     android:textSize="21sp" />
+
+                <Button
+                    android:id="@+id/btnClear"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="325dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/ic_baseline_close_24" />
             </androidx.cardview.widget.CardView>
 
             <LinearLayout

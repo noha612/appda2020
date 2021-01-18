@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
@@ -164,11 +165,11 @@ public class MainActivity extends AppCompatActivity {
 
         mapView = findViewById(R.id.map);
         mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.NEVER);
-//        mapView.setTileSource(new XYTileSource(
-//                "MySource",
-//                0, 18, 256, ".png",
-//                new String[]{"http://192.168.0.107:8081/styles/osm-bright/"}
-//        ));
+        mapView.setTileSource(new XYTileSource(
+                "MySource",
+                0, 18, 256, ".png",
+                new String[]{getString(R.string.tiles_server_url) + "/styles/osm-bright/"}
+        ));
         mapView.setTilesScaledToDpi(true);
         mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mapController = mapView.getController();
@@ -189,13 +190,13 @@ public class MainActivity extends AppCompatActivity {
         compass = new CompassOverlay(this, new InternalCompassOrientationProvider(this), mapView);
         compass.enableCompass();
         mapView.getOverlays().add(compass);
-        compass.setCompassCenter(350, 420);
-//        compass.setCompassCenter(350, 480);
+//        compass.setCompassCenter(350, 420);
+        compass.setCompassCenter(350, 480);
 
         MapEventsReceiver mReceive = new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-                if (TAP_CODE != null) {
+                if ("ALERT".equalsIgnoreCase(TAP_CODE)) {
                     onTap(p);
                 }
 
@@ -239,6 +240,8 @@ public class MainActivity extends AppCompatActivity {
         closeSubCard = findViewById(R.id.closeSubCard);
         routeInfo = findViewById(R.id.routeInfo);
         track = findViewById(R.id.track);
+
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
 
         findRouteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -369,21 +372,21 @@ public class MainActivity extends AppCompatActivity {
         btnLow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAlert(2);
+                sendAlert("SMOOTH");
             }
         });
 
         btnMid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAlert(3);
+                sendAlert("MILD");
             }
         });
 
         btnHigh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAlert(4);
+                sendAlert("HEAVY");
             }
         });
 
@@ -423,6 +426,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getRoute(String startId, String finishId) {
+        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
         hideSubCardAndRoute();
 
         mAPIService.getDirections(startId, finishId).enqueue(new retrofit2.Callback<Direction>() {
@@ -479,8 +483,7 @@ public class MainActivity extends AppCompatActivity {
                                     } else if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) == 3) {
                                         p.getOutlinePaint().setColor(Color.parseColor("#FF5722"));
                                     }
-                                }
-                                else{
+                                } else {
                                     p.getOutlinePaint().setStrokeJoin(Paint.Join.ROUND);
                                     p.getOutlinePaint().setStrokeCap(Paint.Cap.ROUND);
                                 }
@@ -509,6 +512,7 @@ public class MainActivity extends AppCompatActivity {
                             YoYo.with(Techniques.SlideInUp).duration(250).playOn(subCard);
                             subCard.setVisibility(View.VISIBLE);
                             subCard.setEnabled(true);
+                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                         }
                     });
                 }
@@ -712,7 +716,7 @@ public class MainActivity extends AppCompatActivity {
         return deviceId;
     }
 
-    private void sendAlert(int level) {
+    private void sendAlert(String level) {
         String mobileId = getIMEIDeviceId();
         if (StringUtils.isEmpty(mobileId)) mobileId = "emulator0175";
         mAPIService.send(new AlertDTO(mobileId, congestRoad.getId(), level)).enqueue(new Callback<String>() {

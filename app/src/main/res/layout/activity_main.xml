@@ -145,25 +145,25 @@
 
                 <Button
                     android:id="@+id/track"
+                    style="?attr/imageButtonStyle"
                     android:layout_width="100dp"
                     android:layout_height="22dp"
-                    android:text="Bắt đầu"
-                    style="?attr/imageButtonStyle"
-                    android:background="@drawable/layout_button"
-                    android:textColor="@color/b5"
                     android:layout_marginBottom="6dp"
-                    app:layout_constraintRight_toRightOf="parent"
+                    android:background="@drawable/layout_button"
+                    android:text="Bắt đầu"
+                    android:textColor="@color/b5"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent" />
+                    app:layout_constraintRight_toRightOf="parent" />
 
                 <TextView
                     android:id="@+id/routeInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
                     android:text="20 km (18 phút)."
                     android:textColor="@color/b1"
                     android:textSize="22sp"
-                    android:layout_marginBottom="10dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -290,4 +290,18 @@
             android:layout_marginBottom="25dp"
             android:background="@drawable/ic_baseline_push_pin_24" />
     </FrameLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/loadingPanel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <ProgressBar
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+    </RelativeLayout>
 </FrameLayout>

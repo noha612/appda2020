@@ -18,7 +18,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,8 +25,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -50,6 +47,7 @@ public class FindLocationActivity extends AppCompatActivity {
     CardView tap;
     CardView gps;
     Button btnBack;
+    Button btnClear;
     Place[] places;
     String[] stringList;
     String searchResult;
@@ -72,8 +70,7 @@ public class FindLocationActivity extends AppCompatActivity {
         mAPIService = ApiUtils.getAPIService(this);
 
         input = findViewById(R.id.input);
-        autoSuggestAdapter = new AutoSuggestAdapter(this,
-                android.R.layout.simple_dropdown_item_1line);
+        autoSuggestAdapter = new AutoSuggestAdapter(this, R.layout.simple_dropdown_item_2line);
         input.setThreshold(2);
         input.setAdapter(autoSuggestAdapter);
 
@@ -136,6 +133,9 @@ public class FindLocationActivity extends AppCompatActivity {
                 if (msg.what == TRIGGER_AUTO_COMPLETE) {
                     if (!TextUtils.isEmpty(input.getText())) {
                         getId(false);
+                        btnClear.setVisibility(View.VISIBLE);
+                    } else {
+                        btnClear.setVisibility(View.GONE);
                     }
                 }
                 return false;
@@ -167,6 +167,16 @@ public class FindLocationActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 finish();
+            }
+        });
+
+        btnClear = findViewById(R.id.btnClear);
+        btnClear.setVisibility(View.GONE);
+        btnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                input.setText("");
+                btnClear.setVisibility(View.GONE);
             }
         });
     }
@@ -235,7 +245,7 @@ public class FindLocationActivity extends AppCompatActivity {
                                 setResult(getIntent().getIntExtra("requestCode", 0), intent);
                                 finish();
                             } else {
-                                autoSuggestAdapter.setData(Arrays.asList(stringList));
+                                autoSuggestAdapter.setData(Arrays.asList(places));
                                 autoSuggestAdapter.notifyDataSetChanged();
                             }
                         }

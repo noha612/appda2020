@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class Place extends GeoPoint implements Serializable{
     private String name;
+    private String district;
     private String id;
 
     public Place(String name, String id, Double lat, Double lng) {
