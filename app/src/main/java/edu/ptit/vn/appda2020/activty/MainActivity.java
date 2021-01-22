@@ -476,11 +476,11 @@ public class MainActivity extends AppCompatActivity {
                                 p.getOutlinePaint().setColor(Color.parseColor("#E6203A43"));
                                 p.getOutlinePaint().setStrokeWidth(29F);
                                 if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) != null) {
-                                    if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) == 1) {
+                                    if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()).equalsIgnoreCase("SMOOTH")) {
                                         p.getOutlinePaint().setColor(Color.parseColor("#FFEB3B"));
-                                    } else if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) == 2) {
+                                    } else if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()).equalsIgnoreCase("MILD")) {
                                         p.getOutlinePaint().setColor(Color.parseColor("#FFC107"));
-                                    } else if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()) == 3) {
+                                    } else if (direction.getTraffics().get(j1.getId() + "_" + j2.getId()).equalsIgnoreCase("HEAVY")) {
                                         p.getOutlinePaint().setColor(Color.parseColor("#FF5722"));
                                     }
                                 } else {
@@ -515,6 +515,13 @@ public class MainActivity extends AppCompatActivity {
                             findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                         }
                     });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        }
+                    });
                 }
 
             }
@@ -522,6 +529,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(retrofit2.Call<Direction> call, Throwable t) {
 
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                    }
+                });
             }
         });
     }

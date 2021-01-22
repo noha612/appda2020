@@ -86,7 +86,7 @@ public class AutoSuggestAdapter extends ArrayAdapter<String> implements Filterab
         TextView placeParent = convertView.findViewById(R.id.placeParent);
 
         name.setText(mlistData.get(position).getName());
-        placeParent.setText(mlistData.get(position).getDistrict());
+        placeParent.setText(mlistData.get(position).getSubName());
         return convertView;
     }
 }

@@ -14,7 +14,7 @@ public class Direction {
     private GeoPoint from;
     private GeoPoint to;
     private List<Junction> junctions;
-    private Map<String,Integer> traffics;
+    private Map<String, String> traffics;
     private double length; //km
     private double time; //h
 }

@@ -131,7 +131,7 @@ public class FindLocationActivity extends AppCompatActivity {
             @Override
             public boolean handleMessage(Message msg) {
                 if (msg.what == TRIGGER_AUTO_COMPLETE) {
-                    if (!TextUtils.isEmpty(input.getText())) {
+                    if (!TextUtils.isEmpty(input.getText()) && input.getText().length() > 1) {
                         getId(false);
                         btnClear.setVisibility(View.VISIBLE);
                     } else {
